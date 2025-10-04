@@ -14,6 +14,7 @@
     "deploy": "wrangler deploy"
   },
   "dependencies": {
+    "@ai-sdk/google": "^2.0.17",
     "@cloudflare/vite-plugin": "^1.13.8",
     "@intentui/icons": "^1.11.0",
     "@internationalized/date": "^3.10.0",
@@ -34,6 +35,7 @@
     "@tanstack/react-router-ssr-query": "^1.131.7",
     "@tanstack/react-start": "^1.132.0",
     "@tanstack/router-plugin": "^1.132.0",
+    "ai": "^5.0.60",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "embla-carousel-react": "^8.6.0",
