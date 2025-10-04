@@ -1,9 +1,16 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "tanstack-start-app",
+  "name": "2025-10-04-meal-list",
   "compatibility_date": "2025-09-02",
   "compatibility_flags": ["nodejs_compat"],
   "main": "@tanstack/react-start/server-entry",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "2025-10-04-meal-list",
+      "database_id": "e63e6915-83c6-4a80-9b14-436271f964c2"
+    }
+  ],
   "vars": {
     "MY_VAR": "Hello from Cloudflare"
   }
