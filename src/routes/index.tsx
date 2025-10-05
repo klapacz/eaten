@@ -1,4 +1,6 @@
 import { FileTrigger } from '@/components/ui/file-trigger'
+import { db } from '@/db/client'
+import { mealTable } from '@/db/schema'
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn, useServerFn } from '@tanstack/react-start'
 import { env } from 'cloudflare:workers'
@@ -21,11 +23,17 @@ const transcribeServer = createServerFn({ method: 'POST' })
     console.log('Storing transcription in metadata', results)
   })
 
+const listMeals = createServerFn({ method: 'GET' }).handler(async () => {
+  return db.select().from(mealTable)
+})
+
 export const Route = createFileRoute('/')({
   component: App,
+  loader: () => listMeals(),
 })
 
 function App() {
+  const meals = Route.useLoaderData()
   const transcribe = useServerFn(transcribeServer)
 
   return (
@@ -42,6 +50,8 @@ function App() {
           })
         }}
       ></FileTrigger>
+
+      <pre>{JSON.stringify(meals, null, 2)}</pre>
     </div>
   )
 }
