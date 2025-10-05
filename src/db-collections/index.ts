@@ -1,20 +1,27 @@
-import {
-  createCollection,
-  localOnlyCollectionOptions,
-} from '@tanstack/react-db'
-import { z } from 'zod'
+import { createCollection } from '@tanstack/react-db'
+import { electricCollectionOptions } from '@tanstack/electric-db-collection'
+import z from 'zod'
 
-const MessageSchema = z.object({
-  id: z.number(),
-  text: z.string(),
-  user: z.string(),
+const mealTypeSchema = z.enum([
+  'BREAKFAST',
+  'BRUNCH',
+  'LUNCH',
+  'AFTERNOON_SNACK',
+  'DINNER',
+])
+
+const mealSchema = z.object({
+  id: z.uuid(),
+  type: mealTypeSchema,
+  items: z.array(z.string()),
 })
 
-export type Message = z.infer<typeof MessageSchema>
-
-export const messagesCollection = createCollection(
-  localOnlyCollectionOptions({
-    getKey: (message) => message.id,
-    schema: MessageSchema,
+export const mealCollection = createCollection(
+  electricCollectionOptions({
+    shapeOptions: {
+      url: 'http://localhost:3000/v1/shape?table=meal&offset=-1',
+    },
+    schema: mealSchema,
+    getKey: (item) => item.id,
   }),
 )
