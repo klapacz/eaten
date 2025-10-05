@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm'
-import { pgEnum, pgTable, text, uuid } from 'drizzle-orm/pg-core'
+import { pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 
 export const mealTypeEnum = pgEnum('MealType', [
   'BREAKFAST',
@@ -10,6 +10,7 @@ export const mealTypeEnum = pgEnum('MealType', [
 ])
 
 export const mealTable = pgTable('meal', {
+  datetime: timestamp({ mode: 'string' }).notNull(),
   id: uuid().defaultRandom().primaryKey(),
   type: mealTypeEnum().notNull(),
   items: text()

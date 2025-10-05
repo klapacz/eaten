@@ -58,6 +58,7 @@
     "tailwind-variants": "^3.1.1",
     "tailwindcss": "^4.0.6",
     "tailwindcss-react-aria-components": "^2.0.1",
+    "temporal-polyfill": "^0.3.0",
     "vite-tsconfig-paths": "^5.1.4",
     "zod": "^4.1.11"
   },

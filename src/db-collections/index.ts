@@ -10,10 +10,22 @@ const mealTypeSchema = z.enum([
   'DINNER',
 ])
 
+export const mealTypeToDisplayText: Record<
+  z.infer<typeof mealTypeSchema>,
+  string
+> = {
+  BREAKFAST: 'Breakfast',
+  BRUNCH: 'Brunch',
+  LUNCH: 'Lunch',
+  AFTERNOON_SNACK: 'Afternoon Snack',
+  DINNER: 'Dinner',
+}
+
 const mealSchema = z.object({
   id: z.uuid(),
   type: mealTypeSchema,
   items: z.array(z.string()),
+  datetime: z.iso.datetime(),
 })
 
 export const mealCollection = createCollection(
