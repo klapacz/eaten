@@ -1,10 +1,16 @@
 import { Temporal } from 'temporal-polyfill'
 import { Button } from '@/components/ui/button'
 import { Table } from '@/components/ui/table'
-import { mealCollection, mealTypeToDisplayText } from '@/db-collections'
+import {
+  Meal,
+  mealCollection,
+  mealSchema,
+  mealTypeSchema,
+  mealTypeToDisplayText,
+} from '@/db-collections'
 import { db } from '@/db/client'
 import { mealTable } from '@/db/schema'
-import { useLiveQuery } from '@tanstack/react-db'
+import { eq, useLiveQuery } from '@tanstack/react-db'
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn, useServerFn } from '@tanstack/react-start'
 import {
@@ -25,6 +31,14 @@ import {
   useIsTransribeMutationMutating,
   VoiceRecorder,
 } from './-voice-recorder'
+import z from 'zod'
+import { Sheet } from '@/components/ui/sheet'
+import { TanstackForm, useAppForm } from '@/integrations/tanstack-form'
+import { CalendarDateTime, parseDateTime } from '@internationalized/date'
+import { useMemo } from 'react'
+import { Select } from '@/components/ui/select'
+import { fieldStyles } from '@/components/ui/field'
+import { Separator } from '@/components/ui/separator'
 
 const addMealServer = createServerFn({ method: 'POST' }).handler(async () => {
   await db
@@ -43,13 +57,26 @@ const addMealServer = createServerFn({ method: 'POST' }).handler(async () => {
 export const Route = createFileRoute('/')({
   component: App,
   ssr: false,
+  validateSearch: z.object({
+    meal: z.uuid().optional(),
+  }),
 })
 
 function App() {
+  const navigate = Route.useNavigate()
+  const search = Route.useSearch()
   const meals = useLiveQuery((q) =>
     q
       .from({ meal: mealCollection })
       .orderBy(({ meal }) => meal.datetime, 'desc'),
+  )
+  const selectedMeal = useLiveQuery(
+    (q) =>
+      q
+        .from({ meal: mealCollection })
+        .where(({ meal }) => eq(meal.id, search.meal))
+        .findOne(),
+    [search.meal],
   )
   const addMeal = useServerFn(addMealServer)
   const isTransribeMutationMutating = useIsTransribeMutationMutating()
@@ -71,6 +98,17 @@ function App() {
         </Button>
       </div>
 
+      <Sheet
+        isOpen={search.meal !== undefined}
+        onOpenChange={() => navigate({ search: { meal: undefined } })}
+      >
+        <Sheet.Content>
+          {selectedMeal.data ? (
+            <MealSheetContent meal={selectedMeal.data} />
+          ) : null}
+        </Sheet.Content>
+      </Sheet>
+
       <Table aria-label="Meals">
         <Table.Header>
           <Table.Column isRowHeader>Date</Table.Column>
@@ -83,7 +121,9 @@ function App() {
           {(item) => {
             const dt = Temporal.PlainDateTime.from(item.datetime)
             return (
-              <Table.Row>
+              <Table.Row
+                onAction={() => navigate({ search: { meal: item.id } })}
+              >
                 <Table.Cell>
                   {dt.toLocaleString(undefined, {
                     dateStyle: 'short',
@@ -121,5 +161,115 @@ function App() {
         </Table.Body>
       </Table>
     </div>
+  )
+}
+
+const mealFormSchema = mealSchema.extend({
+  datetime: z.instanceof(CalendarDateTime),
+})
+
+const { label } = fieldStyles()
+
+function MealSheetContent({ meal }: { meal: Meal }) {
+  const defaultValues: z.infer<typeof mealFormSchema> = useMemo(
+    () => ({
+      ...meal,
+      datetime: parseDateTime(meal.datetime.replace(' ', 'T')),
+    }),
+    [meal],
+  )
+
+  const form = useAppForm({
+    validators: {
+      onSubmit: mealFormSchema,
+    },
+    defaultValues,
+    onSubmit: ({ value }) => {
+      console.log({ value })
+    },
+  })
+
+  return (
+    <>
+      <Sheet.Header>
+        <Sheet.Title>Meal</Sheet.Title>
+      </Sheet.Header>
+      <TanstackForm form={form} AppForm={form.AppForm}>
+        <Sheet.Body className="grid gap-4">
+          <form.AppField name="datetime">
+            {(field) => <field.DatePicker label="Date and Time" />}
+          </form.AppField>
+
+          <form.AppField name="type">
+            {(field) => (
+              <field.SelectField label="Type">
+                <Select.Trigger />
+                <Select.Content
+                  items={mealTypeSchema.options.map((id) => ({ id }))}
+                >
+                  {(item) => (
+                    <Select.Item
+                      id={item.id}
+                      textValue={mealTypeToDisplayText[item.id]}
+                    >
+                      {mealTypeToDisplayText[item.id]}
+                    </Select.Item>
+                  )}
+                </Select.Content>
+              </field.SelectField>
+            )}
+          </form.AppField>
+
+          <form.Field name="items" mode="array">
+            {(field) => {
+              return (
+                <div className="flex flex-col gap-y-1">
+                  <h3 className={label()}>Items</h3>
+                  {field.state.value.map((_, i) => {
+                    return (
+                      <form.AppField key={i} name={`items[${i}]`}>
+                        {(subField) => {
+                          return (
+                            <div>
+                              <subField.TextField
+                                suffix={
+                                  <Button
+                                    size="sq-xs"
+                                    aria-label="New user"
+                                    onPress={() => field.removeValue(i)}
+                                    intent="plain"
+                                  >
+                                    <IconTrash />
+                                  </Button>
+                                }
+                              />
+                            </div>
+                          )
+                        }}
+                      </form.AppField>
+                    )
+                  })}
+                  <div className="pt-1">
+                    <Button
+                      onPress={() => field.pushValue('')}
+                      intent="secondary"
+                      type="button"
+                      size="sm"
+                    >
+                      Add item
+                    </Button>
+                  </div>
+                </div>
+              )
+            }}
+          </form.Field>
+
+          <Separator />
+        </Sheet.Body>
+        <Sheet.Footer>
+          <form.SubscribeButton />
+        </Sheet.Footer>
+      </TanstackForm>
+    </>
   )
 }

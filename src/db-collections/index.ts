@@ -2,7 +2,7 @@ import { createCollection } from '@tanstack/react-db'
 import { electricCollectionOptions } from '@tanstack/electric-db-collection'
 import z from 'zod'
 
-const mealTypeSchema = z.enum([
+export const mealTypeSchema = z.enum([
   'BREAKFAST',
   'BRUNCH',
   'LUNCH',
@@ -21,12 +21,14 @@ export const mealTypeToDisplayText: Record<
   DINNER: 'Dinner',
 }
 
-const mealSchema = z.object({
+export const mealSchema = z.object({
   id: z.uuid(),
   type: mealTypeSchema,
   items: z.array(z.string()),
   datetime: z.iso.datetime(),
 })
+
+export type Meal = z.infer<typeof mealSchema>
 
 export const mealCollection = createCollection(
   electricCollectionOptions({
