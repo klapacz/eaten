@@ -1,13 +1,7 @@
 import { Temporal } from 'temporal-polyfill'
 import { Button } from '@/components/ui/button'
 import { Table } from '@/components/ui/table'
-import {
-  Meal,
-  mealCollection,
-  mealSchema,
-  mealTypeSchema,
-  mealTypeToDisplayText,
-} from '@/db-collections'
+import { mealCollection } from '@/db-collections'
 import { db } from '@/db/client'
 import { mealTable } from '@/db/schema'
 import { eq, useLiveQuery } from '@tanstack/react-db'
@@ -39,6 +33,12 @@ import { useMemo } from 'react'
 import { Select } from '@/components/ui/select'
 import { fieldStyles } from '@/components/ui/field'
 import { Separator } from '@/components/ui/separator'
+import {
+  Meal,
+  mealSchema,
+  mealTypeSchema,
+  mealTypeToDisplayText,
+} from '@/schemas/meal'
 
 const addMealServer = createServerFn({ method: 'POST' }).handler(async () => {
   await db
@@ -171,6 +171,7 @@ const mealFormSchema = mealSchema.extend({
 const { label } = fieldStyles()
 
 function MealSheetContent({ meal }: { meal: Meal }) {
+  const navigate = Route.useNavigate()
   const defaultValues: z.infer<typeof mealFormSchema> = useMemo(
     () => ({
       ...meal,
@@ -184,8 +185,14 @@ function MealSheetContent({ meal }: { meal: Meal }) {
       onSubmit: mealFormSchema,
     },
     defaultValues,
-    onSubmit: ({ value }) => {
-      console.log({ value })
+    async onSubmit({ value }) {
+      const tx = mealCollection.update(value.id, (draft) => {
+        draft.datetime = value.datetime.toString()
+        draft.items = value.items.filter((item) => item.trim() !== '')
+        draft.type = value.type
+      })
+      await tx.isPersisted.promise
+      await navigate({ search: { meal: undefined } })
     },
   })
 
@@ -196,6 +203,8 @@ function MealSheetContent({ meal }: { meal: Meal }) {
       </Sheet.Header>
       <TanstackForm form={form} AppForm={form.AppForm}>
         <Sheet.Body className="grid gap-4">
+          <form.ServerErrorNote />
+
           <form.AppField name="datetime">
             {(field) => <field.DatePicker label="Date and Time" />}
           </form.AppField>

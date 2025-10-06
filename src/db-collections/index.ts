@@ -1,34 +1,29 @@
 import { createCollection } from '@tanstack/react-db'
 import { electricCollectionOptions } from '@tanstack/electric-db-collection'
-import z from 'zod'
+import { createServerFn } from '@tanstack/react-start'
+import { db } from '@/db/client'
+import { mealTable } from '@/db/schema'
+import { eq } from 'drizzle-orm'
+import { generateTxId } from '@/db/tx'
+import { mealSchema } from '@/schemas/meal'
 
-export const mealTypeSchema = z.enum([
-  'BREAKFAST',
-  'BRUNCH',
-  'LUNCH',
-  'AFTERNOON_SNACK',
-  'DINNER',
-])
+const updateMealServer = createServerFn({ method: 'POST' })
+  .inputValidator(mealSchema)
+  .handler(async ({ data }) => {
+    return await db.transaction(async (tx) => {
+      const { id, ...rest } = data
 
-export const mealTypeToDisplayText: Record<
-  z.infer<typeof mealTypeSchema>,
-  string
-> = {
-  BREAKFAST: 'Breakfast',
-  BRUNCH: 'Brunch',
-  LUNCH: 'Lunch',
-  AFTERNOON_SNACK: 'Afternoon Snack',
-  DINNER: 'Dinner',
-}
+      const [meal] = await tx
+        .select()
+        .from(mealTable)
+        .where(eq(mealTable.id, id))
 
-export const mealSchema = z.object({
-  id: z.uuid(),
-  type: mealTypeSchema,
-  items: z.array(z.string()),
-  datetime: z.iso.datetime(),
-})
+      await tx.update(mealTable).set(rest).where(eq(mealTable.id, meal.id))
 
-export type Meal = z.infer<typeof mealSchema>
+      const txid = await generateTxId(tx)
+      return { txid }
+    })
+  })
 
 export const mealCollection = createCollection(
   electricCollectionOptions({
@@ -37,5 +32,14 @@ export const mealCollection = createCollection(
     },
     schema: mealSchema,
     getKey: (item) => item.id,
+    onUpdate: async ({ transaction }) => {
+      const originalMeal = transaction.mutations[0].original
+      const modifiedMeal = transaction.mutations[0].modified
+      const response = await updateMealServer({
+        data: { ...modifiedMeal, id: originalMeal.id },
+      })
+
+      return { txid: response.txid }
+    },
   }),
 )
