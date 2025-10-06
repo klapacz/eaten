@@ -1,4 +1,7 @@
 import { env } from 'cloudflare:workers'
-import { drizzle } from 'drizzle-orm/neon-http'
+import { drizzle } from 'drizzle-orm/neon-serverless'
 
-export const db = drizzle(env.DATABASE_URL)
+import { Pool } from '@neondatabase/serverless'
+
+const pool = new Pool({ connectionString: env.DATABASE_URL })
+export const db = drizzle(pool)
