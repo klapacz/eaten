@@ -5,6 +5,13 @@ import WaveSurfer from 'wavesurfer.js'
 import { env } from 'cloudflare:workers'
 import z from 'zod'
 import { createServerFn, useServerFn } from '@tanstack/react-start'
+import { generateObject } from 'ai'
+import { google } from '@ai-sdk/google'
+import { createInsertSchema } from 'drizzle-zod'
+import { mealTable } from '@/db/schema'
+import { db } from '@/db/client'
+import { Temporal } from 'temporal-polyfill'
+import { useIsMutating, useMutation } from '@tanstack/react-query'
 
 type VoiceRecorderProps = React.PropsWithChildren
 
@@ -19,25 +26,80 @@ export function VoiceRecorder({ children }: VoiceRecorderProps) {
   )
 }
 
+const transcribeServerFormDataSchema = z.object({
+  audio: z.file(),
+  today: z.iso.date(),
+})
+
 const transcribeServer = createServerFn({ method: 'POST' })
   .inputValidator(z.instanceof(FormData))
-  .handler(async ({ data }) => {
-    const audio = z.file().parse(data.get('audio'))
+  .handler(async ({ data: _data }) => {
+    const data = transcribeServerFormDataSchema.parse(
+      Object.fromEntries(_data.entries()),
+    )
+
     // https://github.com/craigsdennis/autotranscriber-r2-workers-ai
-    const aBuffer = await audio.arrayBuffer()
+    const aBuffer = await data.audio.arrayBuffer()
     const base64String = Buffer.from(aBuffer).toString('base64')
 
     const results = await env.AI.run('@cf/openai/whisper-large-v3-turbo', {
       audio: base64String,
     })
 
-    results.text
+    const transcript = results.text
+    console.log({ transcript })
 
-    console.log('Storing transcription in metadata', results)
+    const schema = createInsertSchema(mealTable).omit({
+      id: true,
+    })
+
+    const { object } = await generateObject({
+      model: google('gemini-2.5-pro'),
+      schema,
+      prompt: `Extract meal information from this voice transcript: "${transcript}"
+
+Current date: ${data.today}
+
+Instructions:
+- Parse the meal name/description from what the user said
+- If the user mentions a specific date or time (e.g., "yesterday", "this morning", "at 3pm"), calculate the appropriate datetime relative to ${data.today}
+- Extract any mentioned nutritional information or details
+- Be flexible with informal language (e.g., "I had pizza" → meal name: "pizza")`,
+    })
+
+    console.log({ object })
+
+    const insertedMeal = await db
+      .insert(mealTable)
+      .values(object)
+      .returning()
+      .execute()
+
+    console.log({ insertedMeal })
   })
 
-function VoiceRecorderInner() {
+const TRANSRIBE_MUTATION_KEY = ['transcribe']
+
+export function useTransribeMutation() {
   const transcribe = useServerFn(transcribeServer)
+
+  return useMutation({
+    mutationKey: TRANSRIBE_MUTATION_KEY,
+    async mutationFn(blob: Blob) {
+      const formData = new FormData()
+      formData.append('audio', blob)
+      formData.append('today', Temporal.Now.plainDateISO().toString())
+      return transcribe({ data: formData })
+    },
+  })
+}
+
+export function useIsTransribeMutationMutating() {
+  return useIsMutating({ mutationKey: TRANSRIBE_MUTATION_KEY })
+}
+
+function VoiceRecorderInner() {
+  const transcribeMutation = useTransribeMutation()
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -57,9 +119,7 @@ function VoiceRecorderInner() {
     wavesurferInstance.registerPlugin(recordPluginInstance)
 
     recordPluginInstance.on('record-end', (blob) => {
-      const formData = new FormData()
-      formData.append('audio', blob)
-      transcribe({ data: formData }).then(console.log)
+      transcribeMutation.mutate(blob)
     })
 
     recordPluginInstance.startRecording()

@@ -21,7 +21,10 @@ import {
   IconTrash,
   IconVoice,
 } from '@intentui/icons'
-import { VoiceRecorder } from './-voice-recorder'
+import {
+  useIsTransribeMutationMutating,
+  VoiceRecorder,
+} from './-voice-recorder'
 
 const addMealServer = createServerFn({ method: 'POST' }).handler(async () => {
   await db
@@ -43,14 +46,23 @@ export const Route = createFileRoute('/')({
 })
 
 function App() {
-  const meals = useLiveQuery((q) => q.from({ meals: mealCollection }))
+  const meals = useLiveQuery((q) =>
+    q
+      .from({ meal: mealCollection })
+      .orderBy(({ meal }) => meal.datetime, 'desc'),
+  )
   const addMeal = useServerFn(addMealServer)
+  const isTransribeMutationMutating = useIsTransribeMutationMutating()
 
   return (
     <div className="container mx-auto flex flex-col gap-6 p-4">
       <div className="flex gap-2">
         <VoiceRecorder>
-          <Button size="sq-md" isCircle>
+          <Button
+            size="sq-md"
+            isCircle
+            isDisabled={isTransribeMutationMutating > 0}
+          >
             <IconVoice />
           </Button>
         </VoiceRecorder>
