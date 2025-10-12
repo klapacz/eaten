@@ -26,6 +26,17 @@ const updateMealServer = createServerFn({ method: 'POST' })
     })
   })
 
+const createMealServer = createServerFn({ method: 'POST' })
+  .inputValidator(mealSchema)
+  .handler(async ({ data }) => {
+    return await DB.createTx(async (tx) => {
+      await DB.use((db) => db.insert(mealTable).values(data))
+
+      const txid = await generateTxId(tx)
+      return { txid }
+    })
+  })
+
 export const mealCollection = createCollection(
   electricCollectionOptions({
     shapeOptions: {
@@ -39,6 +50,12 @@ export const mealCollection = createCollection(
       const response = await updateMealServer({
         data: { ...modifiedMeal, id: originalMeal.id },
       })
+
+      return { txid: response.txid }
+    },
+    onInsert: async ({ transaction }) => {
+      const newMeal = transaction.mutations[0].modified
+      const response = await createMealServer({ data: newMeal })
 
       return { txid: response.txid }
     },
