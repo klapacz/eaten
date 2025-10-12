@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import { Popover, PopoverContent } from '@/components/ui/popover'
 import RecordPlugin from 'wavesurfer.js/dist/plugins/record.esm.js'
-import WaveSurfer from 'wavesurfer.js'
 import { env } from 'cloudflare:workers'
 import z from 'zod'
 import { createServerFn, useServerFn } from '@tanstack/react-start'
@@ -12,6 +11,7 @@ import { mealTable } from '@/db/schema'
 import { DB } from '@/db/client'
 import { Temporal } from 'temporal-polyfill'
 import { useIsMutating, useMutation } from '@tanstack/react-query'
+import { useWavesurfer } from '@wavesurfer/react'
 
 type VoiceRecorderProps = React.PropsWithChildren
 
@@ -100,33 +100,38 @@ function VoiceRecorderInner() {
   const transcribeMutation = useTransribeMutation()
   const containerRef = useRef<HTMLDivElement>(null)
 
+  const { wavesurfer } = useWavesurfer({
+    container: containerRef!,
+    waveColor: '#1891a2',
+    height: 56,
+    barGap: 2,
+    barWidth: 3,
+    cursorWidth: 0,
+    minPxPerSec: 0.5,
+    sampleRate: 8000,
+  })
+
   useEffect(() => {
-    const wavesurferInstance = WaveSurfer.create({
-      container: containerRef.current!,
-      waveColor: '#1891a2',
-      height: 56,
-      barGap: 2,
-      barWidth: 3,
-      cursorWidth: 0,
-      minPxPerSec: 0.5,
-      sampleRate: 8000,
-    })
+    if (!wavesurfer) return
 
-    const recordPluginInstance = RecordPlugin.create()
+    const record = wavesurfer.registerPlugin(
+      RecordPlugin.create({
+        scrollingWaveform: true,
+        renderRecordedAudio: false,
+      }),
+    )
 
-    wavesurferInstance.registerPlugin(recordPluginInstance)
-
-    recordPluginInstance.on('record-end', (blob) => {
+    record.on('record-end', (blob) => {
       transcribeMutation.mutate(blob)
     })
 
-    recordPluginInstance.startRecording()
+    record.startRecording()
 
     return () => {
-      recordPluginInstance.stopRecording()
-      wavesurferInstance.destroy()
+      record.stopRecording()
+      wavesurfer.unregisterPlugin(record)
     }
-  }, [])
+  }, [wavesurfer])
 
   return <div ref={containerRef} />
 }
