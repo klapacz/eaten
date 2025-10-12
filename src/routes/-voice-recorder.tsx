@@ -9,7 +9,7 @@ import { generateObject } from 'ai'
 import { google } from '@ai-sdk/google'
 import { createInsertSchema } from 'drizzle-zod'
 import { mealTable } from '@/db/schema'
-import { db } from '@/db/client'
+import { DB } from '@/db/client'
 import { Temporal } from 'temporal-polyfill'
 import { useIsMutating, useMutation } from '@tanstack/react-query'
 
@@ -69,11 +69,9 @@ Instructions:
 
     console.log({ object })
 
-    const insertedMeal = await db
-      .insert(mealTable)
-      .values(object)
-      .returning()
-      .execute()
+    const insertedMeal = await DB.use((db) =>
+      db.insert(mealTable).values(object).returning().execute(),
+    )
 
     console.log({ insertedMeal })
   })

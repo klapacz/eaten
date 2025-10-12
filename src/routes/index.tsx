@@ -2,7 +2,7 @@ import { Temporal } from 'temporal-polyfill'
 import { Button } from '@/components/ui/button'
 import { Table } from '@/components/ui/table'
 import { mealCollection } from '@/db-collections'
-import { db } from '@/db/client'
+import { DB } from '@/db/client'
 import { mealTable } from '@/db/schema'
 import { eq, useLiveQuery } from '@tanstack/react-db'
 import { createFileRoute } from '@tanstack/react-router'
@@ -41,17 +41,19 @@ import {
 } from '@/schemas/meal'
 
 const addMealServer = createServerFn({ method: 'POST' }).handler(async () => {
-  await db
-    .insert(mealTable)
-    .values({
-      type: 'BRUNCH',
-      datetime: Temporal.PlainDateTime.from({
-        year: 2025,
-        month: 10,
-        day: 5,
-      }).toString(),
-    })
-    .execute()
+  await DB.use((db) =>
+    db
+      .insert(mealTable)
+      .values({
+        type: 'BRUNCH',
+        datetime: Temporal.PlainDateTime.from({
+          year: 2025,
+          month: 10,
+          day: 5,
+        }).toString(),
+      })
+      .execute(),
+  )
 })
 
 export const Route = createFileRoute('/')({
