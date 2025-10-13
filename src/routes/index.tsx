@@ -161,7 +161,10 @@ function App() {
                         <IconHighlight /> Edit
                       </MenuItem>
                       <MenuSeparator />
-                      <MenuItem isDanger>
+                      <MenuItem
+                        isDanger
+                        onAction={() => mealCollection.delete(item.id)}
+                      >
                         <IconTrash /> Delete
                       </MenuItem>
                     </MenuContent>

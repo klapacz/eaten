@@ -6,6 +6,7 @@ import { mealTable } from '@/db/schema'
 import { eq } from 'drizzle-orm'
 import { generateTxId } from '@/db/tx'
 import { mealSchema } from '@/schemas/meal'
+import z from 'zod'
 
 const updateMealServer = createServerFn({ method: 'POST' })
   .inputValidator(mealSchema)
@@ -37,6 +38,19 @@ const createMealServer = createServerFn({ method: 'POST' })
     })
   })
 
+const removeMealServer = createServerFn({ method: 'POST' })
+  .inputValidator(z.object({ id: z.uuid() }))
+  .handler(async ({ data }) => {
+    return await DB.createTx(async (tx) => {
+      await DB.use((db) =>
+        db.delete(mealTable).where(eq(mealTable.id, data.id)),
+      )
+
+      const txid = await generateTxId(tx)
+      return { txid }
+    })
+  })
+
 export const mealCollection = createCollection(
   electricCollectionOptions({
     shapeOptions: {
@@ -56,6 +70,12 @@ export const mealCollection = createCollection(
     onInsert: async ({ transaction }) => {
       const newMeal = transaction.mutations[0].modified
       const response = await createMealServer({ data: newMeal })
+
+      return { txid: response.txid }
+    },
+    onDelete: async ({ transaction }) => {
+      const deletedMeal = transaction.mutations[0].original
+      const response = await removeMealServer({ data: deletedMeal })
 
       return { txid: response.txid }
     },
