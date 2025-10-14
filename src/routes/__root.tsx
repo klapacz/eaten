@@ -11,6 +11,7 @@ import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import appCss from '../styles.css?url'
 
 import type { QueryClient } from '@tanstack/react-query'
+import { RouterProvider } from 'react-aria-components'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -48,7 +49,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        {children}
+        {/* See: https://github.com/adobe/react-spectrum/issues/8920#issuecomment-3383404322 */}
+        <RouterProvider navigate={() => {}}>{children}</RouterProvider>
         <TanStackDevtools
           config={{
             position: 'bottom-right',
