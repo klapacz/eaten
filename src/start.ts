@@ -21,6 +21,7 @@ const dbContextGlobalMiddleware = createMiddleware().server(
 
 export const startInstance = createStart(() => {
   return {
+    defaultSsr: false,
     requestMiddleware: [dbContextGlobalMiddleware],
   }
 })

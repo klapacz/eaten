@@ -6,37 +6,27 @@ import {
 import { mealCollection } from '@/db-collections'
 import { cn } from '@/lib/utils'
 import { Meal, mealTypeToDisplayText } from '@/schemas/meal'
-import { eq, like, useLiveQuery } from '@tanstack/react-db'
-import { createFileRoute, createLink } from '@tanstack/react-router'
+import { like, useLiveQuery } from '@tanstack/react-db'
+import { createFileRoute, createLink, Outlet } from '@tanstack/react-router'
 import { useMemo } from 'react'
 import {
   GridListItemProps,
   isTextDropItem,
-  Link,
   useDragAndDrop,
 } from 'react-aria-components'
 import { Temporal } from 'temporal-polyfill'
 import { Interval, startOfWeek } from 'vremel'
 import {
-  CreateMealSheetContent,
-  UpdateMealSheetContent,
-  validateSearch,
-} from './-shared'
-import {
   useIsTransribeMutationMutating,
   VoiceRecorder,
 } from './-voice-recorder'
 import { Button, buttonStyles } from '@/components/ui/button'
-import { Sheet } from '@/components/ui/sheet'
 import { IconVoice } from '@intentui/icons'
+import { Link } from '@/components/ui/link'
 
 export const Route = createFileRoute('/calendar')({
   component: RouteComponent,
-  ssr: false,
-  validateSearch: validateSearch,
 })
-
-const TanstackLink = createLink(Link)
 
 function RouteComponent() {
   const days: DayType[] = useMemo(() => {
@@ -55,16 +45,6 @@ function RouteComponent() {
     return days
   }, [])
 
-  const navigate = Route.useNavigate()
-  const search = Route.useSearch()
-  const selectedMeal = useLiveQuery(
-    (q) =>
-      q
-        .from({ meal: mealCollection })
-        .where(({ meal }) => eq(meal.id, search.meal))
-        .findOne(),
-    [search.meal],
-  )
   const isTransribeMutationMutating = useIsTransribeMutationMutating()
 
   return (
@@ -79,36 +59,15 @@ function RouteComponent() {
             <IconVoice />
           </Button>
         </VoiceRecorder>
-        <TanstackLink
-          from={Route.fullPath}
-          search={{ add: true }}
+        <Link
+          to="/calendar/add"
           className={buttonStyles({ intent: 'secondary' })}
         >
           Create meal
-        </TanstackLink>
+        </Link>
       </div>
 
-      <Sheet
-        isOpen={search.add !== undefined}
-        onOpenChange={() => navigate({ search: { meal: undefined } })}
-      >
-        <Sheet.Content>
-          {({ close }) => <CreateMealSheetContent close={close} />}
-        </Sheet.Content>
-      </Sheet>
-
-      <Sheet
-        isOpen={search.meal !== undefined}
-        onOpenChange={() => navigate({ search: { add: undefined } })}
-      >
-        <Sheet.Content>
-          {({ close }) =>
-            selectedMeal.data ? (
-              <UpdateMealSheetContent meal={selectedMeal.data} close={close} />
-            ) : null
-          }
-        </Sheet.Content>
-      </Sheet>
+      <Outlet />
 
       <div className="grid auto-cols-[200px] grid-flow-col gap-2 overflow-x-auto divide-x">
         {days.map((day) => (
@@ -210,7 +169,8 @@ function MealCard({ meal, ...props }: { meal: Meal } & GridListItemProps) {
   return (
     <GridListItemLink
       from={Route.fullPath}
-      search={{ meal: meal.id }}
+      to="/calendar/$mealId"
+      params={{ mealId: meal.id }}
       className="p-2 flex-col gap-2 bg-white"
       aria-label={`Meal ${meal.id}`}
       textValue={`Meal ${meal.id}`}

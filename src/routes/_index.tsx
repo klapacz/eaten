@@ -2,8 +2,8 @@ import { Temporal } from 'temporal-polyfill'
 import { Button, buttonStyles } from '@/components/ui/button'
 import { Table } from '@/components/ui/table'
 import { mealCollection } from '@/db-collections'
-import { eq, useLiveQuery } from '@tanstack/react-db'
-import { createFileRoute, createLink } from '@tanstack/react-router'
+import { useLiveQuery } from '@tanstack/react-db'
+import { createFileRoute, createLink, Outlet } from '@tanstack/react-router'
 import {
   Menu,
   MenuContent,
@@ -22,38 +22,18 @@ import {
   useIsTransribeMutationMutating,
   VoiceRecorder,
 } from './-voice-recorder'
-import { Sheet } from '@/components/ui/sheet'
 import { mealTypeToDisplayText } from '@/schemas/meal'
-import {
-  CreateMealSheetContent,
-  UpdateMealSheetContent,
-  validateSearch,
-} from './-shared'
-import { Link } from 'react-aria-components'
+import { Link } from '@/components/ui/link'
 
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute('/_index')({
   component: App,
-  ssr: false,
-  validateSearch: validateSearch,
 })
 
-const TanstackLink = createLink(Link)
-
 function App() {
-  const navigate = Route.useNavigate()
-  const search = Route.useSearch()
   const meals = useLiveQuery((q) =>
     q
       .from({ meal: mealCollection })
       .orderBy(({ meal }) => meal.datetime, 'desc'),
-  )
-  const selectedMeal = useLiveQuery(
-    (q) =>
-      q
-        .from({ meal: mealCollection })
-        .where(({ meal }) => eq(meal.id, search.meal))
-        .findOne(),
-    [search.meal],
   )
   const isTransribeMutationMutating = useIsTransribeMutationMutating()
 
@@ -69,36 +49,12 @@ function App() {
             <IconVoice />
           </Button>
         </VoiceRecorder>
-        <TanstackLink
-          from={Route.fullPath}
-          search={{ add: true }}
-          className={buttonStyles({ intent: 'secondary' })}
-        >
+        <Link to="/add" className={buttonStyles({ intent: 'secondary' })}>
           Create meal
-        </TanstackLink>
+        </Link>
       </div>
 
-      <Sheet
-        isOpen={search.add !== undefined}
-        onOpenChange={() => navigate({ search: { meal: undefined } })}
-      >
-        <Sheet.Content>
-          {({ close }) => <CreateMealSheetContent close={close} />}
-        </Sheet.Content>
-      </Sheet>
-
-      <Sheet
-        isOpen={search.meal !== undefined}
-        onOpenChange={() => navigate({ search: { add: undefined } })}
-      >
-        <Sheet.Content>
-          {({ close }) =>
-            selectedMeal.data ? (
-              <UpdateMealSheetContent meal={selectedMeal.data} close={close} />
-            ) : null
-          }
-        </Sheet.Content>
-      </Sheet>
+      <Outlet />
 
       <Table aria-label="Meals">
         <Table.Header>
@@ -109,10 +65,10 @@ function App() {
           <Table.Column />
         </Table.Header>
         <Table.Body items={meals.data}>
-          {(item) => {
-            const dt = Temporal.PlainDateTime.from(item.datetime)
+          {(meal) => {
+            const dt = Temporal.PlainDateTime.from(meal.datetime)
             return (
-              <TableRowLink from={Route.fullPath} search={{ meal: item.id }}>
+              <TableRowLink to="/$mealId" params={{ mealId: meal.id }}>
                 <Table.Cell>
                   {dt.toLocaleString(undefined, {
                     dateStyle: 'short',
@@ -123,8 +79,8 @@ function App() {
                     timeStyle: 'short',
                   })}
                 </Table.Cell>
-                <Table.Cell>{mealTypeToDisplayText[item.type]}</Table.Cell>
-                <Table.Cell>{item.items.join(', ')}</Table.Cell>
+                <Table.Cell>{mealTypeToDisplayText[meal.type]}</Table.Cell>
+                <Table.Cell>{meal.items.join(', ')}</Table.Cell>
                 <Table.Cell className="text-end last:pr-2.5">
                   <Menu>
                     <MenuTrigger>
@@ -140,7 +96,7 @@ function App() {
                       <MenuSeparator />
                       <MenuItem
                         isDanger
-                        onAction={() => mealCollection.delete(item.id)}
+                        onAction={() => mealCollection.delete(meal.id)}
                       >
                         <IconTrash /> Delete
                       </MenuItem>

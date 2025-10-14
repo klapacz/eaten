@@ -9,48 +9,117 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as IndexRouteImport } from './routes/_index'
 import { Route as CalendarRouteImport } from './routes/calendar'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as IndexIndexRouteImport } from './routes/_index.index'
+import { Route as CalendarAddRouteImport } from './routes/calendar.add'
+import { Route as CalendarMealIdRouteImport } from './routes/calendar.$mealId'
+import { Route as IndexAddRouteImport } from './routes/_index.add'
+import { Route as IndexMealIdRouteImport } from './routes/_index.$mealId'
 
+const IndexRoute = IndexRouteImport.update({
+  id: '/_index',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CalendarRoute = CalendarRouteImport.update({
   id: '/calendar',
   path: '/calendar',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
+const IndexIndexRoute = IndexIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => IndexRoute,
+} as any)
+const CalendarAddRoute = CalendarAddRouteImport.update({
+  id: '/add',
+  path: '/add',
+  getParentRoute: () => CalendarRoute,
+} as any)
+const CalendarMealIdRoute = CalendarMealIdRouteImport.update({
+  id: '/$mealId',
+  path: '/$mealId',
+  getParentRoute: () => CalendarRoute,
+} as any)
+const IndexAddRoute = IndexAddRouteImport.update({
+  id: '/add',
+  path: '/add',
+  getParentRoute: () => IndexRoute,
+} as any)
+const IndexMealIdRoute = IndexMealIdRouteImport.update({
+  id: '/$mealId',
+  path: '/$mealId',
+  getParentRoute: () => IndexRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/calendar': typeof CalendarRoute
+  '/calendar': typeof CalendarRouteWithChildren
+  '/$mealId': typeof IndexMealIdRoute
+  '/add': typeof IndexAddRoute
+  '/calendar/$mealId': typeof CalendarMealIdRoute
+  '/calendar/add': typeof CalendarAddRoute
+  '/': typeof IndexIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/calendar': typeof CalendarRoute
+  '/calendar': typeof CalendarRouteWithChildren
+  '/$mealId': typeof IndexMealIdRoute
+  '/add': typeof IndexAddRoute
+  '/calendar/$mealId': typeof CalendarMealIdRoute
+  '/calendar/add': typeof CalendarAddRoute
+  '/': typeof IndexIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/calendar': typeof CalendarRoute
+  '/_index': typeof IndexRouteWithChildren
+  '/calendar': typeof CalendarRouteWithChildren
+  '/_index/$mealId': typeof IndexMealIdRoute
+  '/_index/add': typeof IndexAddRoute
+  '/calendar/$mealId': typeof CalendarMealIdRoute
+  '/calendar/add': typeof CalendarAddRoute
+  '/_index/': typeof IndexIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/calendar'
+  fullPaths:
+    | '/calendar'
+    | '/$mealId'
+    | '/add'
+    | '/calendar/$mealId'
+    | '/calendar/add'
+    | '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/calendar'
-  id: '__root__' | '/' | '/calendar'
+  to:
+    | '/calendar'
+    | '/$mealId'
+    | '/add'
+    | '/calendar/$mealId'
+    | '/calendar/add'
+    | '/'
+  id:
+    | '__root__'
+    | '/_index'
+    | '/calendar'
+    | '/_index/$mealId'
+    | '/_index/add'
+    | '/calendar/$mealId'
+    | '/calendar/add'
+    | '/_index/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  CalendarRoute: typeof CalendarRoute
+  IndexRoute: typeof IndexRouteWithChildren
+  CalendarRoute: typeof CalendarRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/_index': {
+      id: '/_index'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/calendar': {
       id: '/calendar'
       path: '/calendar'
@@ -58,19 +127,75 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CalendarRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
+    '/_index/': {
+      id: '/_index/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof IndexIndexRouteImport
+      parentRoute: typeof IndexRoute
+    }
+    '/calendar/add': {
+      id: '/calendar/add'
+      path: '/add'
+      fullPath: '/calendar/add'
+      preLoaderRoute: typeof CalendarAddRouteImport
+      parentRoute: typeof CalendarRoute
+    }
+    '/calendar/$mealId': {
+      id: '/calendar/$mealId'
+      path: '/$mealId'
+      fullPath: '/calendar/$mealId'
+      preLoaderRoute: typeof CalendarMealIdRouteImport
+      parentRoute: typeof CalendarRoute
+    }
+    '/_index/add': {
+      id: '/_index/add'
+      path: '/add'
+      fullPath: '/add'
+      preLoaderRoute: typeof IndexAddRouteImport
+      parentRoute: typeof IndexRoute
+    }
+    '/_index/$mealId': {
+      id: '/_index/$mealId'
+      path: '/$mealId'
+      fullPath: '/$mealId'
+      preLoaderRoute: typeof IndexMealIdRouteImport
+      parentRoute: typeof IndexRoute
     }
   }
 }
 
+interface IndexRouteChildren {
+  IndexMealIdRoute: typeof IndexMealIdRoute
+  IndexAddRoute: typeof IndexAddRoute
+  IndexIndexRoute: typeof IndexIndexRoute
+}
+
+const IndexRouteChildren: IndexRouteChildren = {
+  IndexMealIdRoute: IndexMealIdRoute,
+  IndexAddRoute: IndexAddRoute,
+  IndexIndexRoute: IndexIndexRoute,
+}
+
+const IndexRouteWithChildren = IndexRoute._addFileChildren(IndexRouteChildren)
+
+interface CalendarRouteChildren {
+  CalendarMealIdRoute: typeof CalendarMealIdRoute
+  CalendarAddRoute: typeof CalendarAddRoute
+}
+
+const CalendarRouteChildren: CalendarRouteChildren = {
+  CalendarMealIdRoute: CalendarMealIdRoute,
+  CalendarAddRoute: CalendarAddRoute,
+}
+
+const CalendarRouteWithChildren = CalendarRoute._addFileChildren(
+  CalendarRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  CalendarRoute: CalendarRoute,
+  IndexRoute: IndexRouteWithChildren,
+  CalendarRoute: CalendarRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

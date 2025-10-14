@@ -6,13 +6,19 @@ import {
 } from 'react-aria-components'
 import { twJoin } from 'tailwind-merge'
 import { composeTailwindRenderProps } from '@/lib/primitive'
+import { createLink } from '@tanstack/react-router'
 
 interface LinkProps extends LinkPrimitiveProps {
   intent?: 'primary' | 'secondary' | 'unstyled'
   ref?: React.RefObject<HTMLAnchorElement>
 }
 
-const Link = ({ className, ref, intent = 'unstyled', ...props }: LinkProps) => {
+const LinkInner = ({
+  className,
+  ref,
+  intent = 'unstyled',
+  ...props
+}: LinkProps) => {
   return (
     <LinkPrimitive
       ref={ref}
@@ -38,5 +44,6 @@ const Link = ({ className, ref, intent = 'unstyled', ...props }: LinkProps) => {
   )
 }
 
+export const Link = createLink(LinkInner)
+
 export type { LinkProps }
-export { Link }
