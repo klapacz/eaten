@@ -16,10 +16,7 @@ import {
 } from 'react-aria-components'
 import { Temporal } from 'temporal-polyfill'
 import { Interval, startOfWeek } from 'vremel'
-import {
-  useIsTransribeMutationMutating,
-  VoiceRecorder,
-} from './-voice-recorder'
+import { VoiceRecorder } from './-voice-recorder'
 import { Button, buttonStyles } from '@/components/ui/button'
 import { IconVoice } from '@intentui/icons'
 import { Link } from '@/components/ui/link'
@@ -29,6 +26,7 @@ export const Route = createFileRoute('/calendar')({
 })
 
 function RouteComponent() {
+  const navigate = Route.useNavigate()
   const days: DayType[] = useMemo(() => {
     const today = Temporal.Now.plainDateISO()
     const weekStart = startOfWeek(today, { firstDayOfWeek: 1 })
@@ -45,17 +43,15 @@ function RouteComponent() {
     return days
   }, [])
 
-  const isTransribeMutationMutating = useIsTransribeMutationMutating()
-
   return (
     <div>
       <div className="flex gap-2">
-        <VoiceRecorder>
-          <Button
-            size="sq-md"
-            isCircle
-            isDisabled={isTransribeMutationMutating > 0}
-          >
+        <VoiceRecorder
+          onOpen={({ mealId }) => {
+            void navigate({ to: '/calendar/$mealId', params: { mealId } })
+          }}
+        >
+          <Button size="sq-md" isCircle>
             <IconVoice />
           </Button>
         </VoiceRecorder>

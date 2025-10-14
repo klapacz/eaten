@@ -18,10 +18,7 @@ import {
   IconTrash,
   IconVoice,
 } from '@intentui/icons'
-import {
-  useIsTransribeMutationMutating,
-  VoiceRecorder,
-} from './-voice-recorder'
+import { VoiceRecorder } from './-voice-recorder'
 import { mealTypeToDisplayText } from '@/schemas/meal'
 import { Link } from '@/components/ui/link'
 
@@ -30,22 +27,22 @@ export const Route = createFileRoute('/_index')({
 })
 
 function App() {
+  const navigate = Route.useNavigate()
   const meals = useLiveQuery((q) =>
     q
       .from({ meal: mealCollection })
       .orderBy(({ meal }) => meal.datetime, 'desc'),
   )
-  const isTransribeMutationMutating = useIsTransribeMutationMutating()
 
   return (
     <div className="container mx-auto flex flex-col gap-6 p-4">
       <div className="flex gap-2">
-        <VoiceRecorder>
-          <Button
-            size="sq-md"
-            isCircle
-            isDisabled={isTransribeMutationMutating > 0}
-          >
+        <VoiceRecorder
+          onOpen={({ mealId }) => {
+            void navigate({ to: '/$mealId', params: { mealId } })
+          }}
+        >
+          <Button size="sq-md" isCircle>
             <IconVoice />
           </Button>
         </VoiceRecorder>

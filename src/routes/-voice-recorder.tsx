@@ -12,15 +12,20 @@ import { DB } from '@/db/client'
 import { Temporal } from 'temporal-polyfill'
 import { useIsMutating, useMutation } from '@tanstack/react-query'
 import { useWavesurfer } from '@wavesurfer/react'
+import { toast } from 'sonner'
 
-type VoiceRecorderProps = React.PropsWithChildren
+type VoiceRecorderInnerProps = {
+  onOpen: (data: { mealId: string }) => void
+}
 
-export function VoiceRecorder({ children }: VoiceRecorderProps) {
+type VoiceRecorderProps = React.PropsWithChildren<VoiceRecorderInnerProps>
+
+export function VoiceRecorder({ children, ...props }: VoiceRecorderProps) {
   return (
     <Popover>
       {children}
       <PopoverContent className="w-96 p-2" placement="bottom start">
-        <VoiceRecorderInner />
+        <VoiceRecorderInner {...props} />
       </PopoverContent>
     </Popover>
   )
@@ -69,11 +74,13 @@ Instructions:
 
     console.log({ object })
 
-    const insertedMeal = await DB.use((db) =>
+    const [insertedMeal] = await DB.use((db) =>
       db.insert(mealTable).values(object).returning().execute(),
     )
 
     console.log({ insertedMeal })
+
+    return insertedMeal
   })
 
 const TRANSRIBE_MUTATION_KEY = ['transcribe']
@@ -96,7 +103,7 @@ export function useIsTransribeMutationMutating() {
   return useIsMutating({ mutationKey: TRANSRIBE_MUTATION_KEY })
 }
 
-function VoiceRecorderInner() {
+function VoiceRecorderInner(props: VoiceRecorderInnerProps) {
   const transcribeMutation = useTransribeMutation()
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -122,7 +129,17 @@ function VoiceRecorderInner() {
     )
 
     record.on('record-end', (blob) => {
-      transcribeMutation.mutate(blob)
+      toast.promise(transcribeMutation.mutateAsync(blob), {
+        loading: 'Transcribing...',
+        success: (data) => ({
+          message: 'Transcription complete.',
+          action: {
+            label: 'View',
+            onClick: () => props.onOpen({ mealId: data.id }),
+          },
+        }),
+        error: 'Failed to transcribe.',
+      })
     })
 
     record.startRecording()
