@@ -385,7 +385,6 @@ const SidebarSection = ({ className, ...props }: SidebarSectionProps) => {
 
 interface SidebarItemProps
   extends Omit<React.ComponentProps<typeof Link>, 'className' | 'children'> {
-  isCurrent?: boolean
   badge?: string | number | undefined
   className?: string
   children: React.ReactNode
@@ -393,7 +392,6 @@ interface SidebarItemProps
 }
 
 const SidebarItem = ({
-  isCurrent,
   tooltip,
   children,
   badge,
@@ -407,7 +405,6 @@ const SidebarItem = ({
     <Link
       ref={ref}
       data-slot="sidebar-item"
-      aria-current={isCurrent ? 'page' : undefined}
       className={twMerge([
         'cursor-pointer',
         'relative w-full min-w-0 items-center rounded-lg text-left font-medium text-base/6 text-sidebar-fg',
@@ -420,7 +417,6 @@ const SidebarItem = ({
         'grid grid-cols-[auto_1fr_1.5rem_0.5rem_auto] p-2 **:last:data-[slot=icon]:ml-auto supports-[grid-template-columns:subgrid]:grid-cols-subgrid sm:text-sm/5',
         'has-[a]:p-0',
         '[--sidebar-current-bg:var(--color-sidebar-primary)] [--sidebar-current-fg:var(--color-sidebar-primary-fg)]',
-        // TODO: next line current
         'data-[status=active]:bg-(--sidebar-current-bg)/90 data-[status=active]:font-medium data-[status=active]:text-(--sidebar-current-fg) data-[status=active]:hover:bg-(--sidebar-current-bg) data-[status=active]:hover:text-(--sidebar-current-fg) data-[status=active]:**:data-[slot=icon]:text-(--sidebar-current-fg) data-[status=active]:hover:**:data-[slot=icon]:text-(--sidebar-current-fg) data-[status=active]:[&_.text-muted-fg]:text-sidebar-primary-fg/80',
         'focus-visible:inset-ring focus-visible:inset-ring-sidebar-ring focus-visible:outline-hidden',
         // Pressed and hovered are the same

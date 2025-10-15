@@ -10,20 +10,26 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
-import { Route as AppIndexRouteImport } from './routes/_app._index'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppMealRouteImport } from './routes/_app.meal'
 import { Route as AppCalendarRouteImport } from './routes/_app.calendar'
-import { Route as AppIndexIndexRouteImport } from './routes/_app._index.index'
+import { Route as AppMealAddRouteImport } from './routes/_app.meal.add'
+import { Route as AppMealMealIdRouteImport } from './routes/_app.meal.$mealId'
 import { Route as AppCalendarAddRouteImport } from './routes/_app.calendar.add'
 import { Route as AppCalendarMealIdRouteImport } from './routes/_app.calendar.$mealId'
-import { Route as AppIndexAddRouteImport } from './routes/_app._index.add'
-import { Route as AppIndexMealIdRouteImport } from './routes/_app._index.$mealId'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppIndexRoute = AppIndexRouteImport.update({
-  id: '/_index',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppMealRoute = AppMealRouteImport.update({
+  id: '/meal',
+  path: '/meal',
   getParentRoute: () => AppRoute,
 } as any)
 const AppCalendarRoute = AppCalendarRouteImport.update({
@@ -31,10 +37,15 @@ const AppCalendarRoute = AppCalendarRouteImport.update({
   path: '/calendar',
   getParentRoute: () => AppRoute,
 } as any)
-const AppIndexIndexRoute = AppIndexIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AppIndexRoute,
+const AppMealAddRoute = AppMealAddRouteImport.update({
+  id: '/add',
+  path: '/add',
+  getParentRoute: () => AppMealRoute,
+} as any)
+const AppMealMealIdRoute = AppMealMealIdRouteImport.update({
+  id: '/$mealId',
+  path: '/$mealId',
+  getParentRoute: () => AppMealRoute,
 } as any)
 const AppCalendarAddRoute = AppCalendarAddRouteImport.update({
   id: '/add',
@@ -46,74 +57,69 @@ const AppCalendarMealIdRoute = AppCalendarMealIdRouteImport.update({
   path: '/$mealId',
   getParentRoute: () => AppCalendarRoute,
 } as any)
-const AppIndexAddRoute = AppIndexAddRouteImport.update({
-  id: '/add',
-  path: '/add',
-  getParentRoute: () => AppIndexRoute,
-} as any)
-const AppIndexMealIdRoute = AppIndexMealIdRouteImport.update({
-  id: '/$mealId',
-  path: '/$mealId',
-  getParentRoute: () => AppIndexRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
   '/calendar': typeof AppCalendarRouteWithChildren
-  '/$mealId': typeof AppIndexMealIdRoute
-  '/add': typeof AppIndexAddRoute
+  '/meal': typeof AppMealRouteWithChildren
   '/calendar/$mealId': typeof AppCalendarMealIdRoute
   '/calendar/add': typeof AppCalendarAddRoute
-  '/': typeof AppIndexIndexRoute
+  '/meal/$mealId': typeof AppMealMealIdRoute
+  '/meal/add': typeof AppMealAddRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
   '/calendar': typeof AppCalendarRouteWithChildren
-  '/$mealId': typeof AppIndexMealIdRoute
-  '/add': typeof AppIndexAddRoute
+  '/meal': typeof AppMealRouteWithChildren
   '/calendar/$mealId': typeof AppCalendarMealIdRoute
   '/calendar/add': typeof AppCalendarAddRoute
-  '/': typeof AppIndexIndexRoute
+  '/meal/$mealId': typeof AppMealMealIdRoute
+  '/meal/add': typeof AppMealAddRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
-  '/_app/_index': typeof AppIndexRouteWithChildren
   '/_app/calendar': typeof AppCalendarRouteWithChildren
-  '/_app/_index/$mealId': typeof AppIndexMealIdRoute
-  '/_app/_index/add': typeof AppIndexAddRoute
+  '/_app/meal': typeof AppMealRouteWithChildren
   '/_app/calendar/$mealId': typeof AppCalendarMealIdRoute
   '/_app/calendar/add': typeof AppCalendarAddRoute
-  '/_app/_index/': typeof AppIndexIndexRoute
+  '/_app/meal/$mealId': typeof AppMealMealIdRoute
+  '/_app/meal/add': typeof AppMealAddRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
     | '/calendar'
-    | '/$mealId'
-    | '/add'
+    | '/meal'
     | '/calendar/$mealId'
     | '/calendar/add'
-    | '/'
+    | '/meal/$mealId'
+    | '/meal/add'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/calendar'
-    | '/$mealId'
-    | '/add'
+    | '/meal'
     | '/calendar/$mealId'
     | '/calendar/add'
-    | '/'
+    | '/meal/$mealId'
+    | '/meal/add'
   id:
     | '__root__'
+    | '/'
     | '/_app'
-    | '/_app/_index'
     | '/_app/calendar'
-    | '/_app/_index/$mealId'
-    | '/_app/_index/add'
+    | '/_app/meal'
     | '/_app/calendar/$mealId'
     | '/_app/calendar/add'
-    | '/_app/_index/'
+    | '/_app/meal/$mealId'
+    | '/_app/meal/add'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
 }
 
@@ -126,11 +132,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_app/_index': {
-      id: '/_app/_index'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof AppIndexRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/meal': {
+      id: '/_app/meal'
+      path: '/meal'
+      fullPath: '/meal'
+      preLoaderRoute: typeof AppMealRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/calendar': {
@@ -140,12 +153,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCalendarRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/_index/': {
-      id: '/_app/_index/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof AppIndexIndexRouteImport
-      parentRoute: typeof AppIndexRoute
+    '/_app/meal/add': {
+      id: '/_app/meal/add'
+      path: '/add'
+      fullPath: '/meal/add'
+      preLoaderRoute: typeof AppMealAddRouteImport
+      parentRoute: typeof AppMealRoute
+    }
+    '/_app/meal/$mealId': {
+      id: '/_app/meal/$mealId'
+      path: '/$mealId'
+      fullPath: '/meal/$mealId'
+      preLoaderRoute: typeof AppMealMealIdRouteImport
+      parentRoute: typeof AppMealRoute
     }
     '/_app/calendar/add': {
       id: '/_app/calendar/add'
@@ -161,38 +181,8 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCalendarMealIdRouteImport
       parentRoute: typeof AppCalendarRoute
     }
-    '/_app/_index/add': {
-      id: '/_app/_index/add'
-      path: '/add'
-      fullPath: '/add'
-      preLoaderRoute: typeof AppIndexAddRouteImport
-      parentRoute: typeof AppIndexRoute
-    }
-    '/_app/_index/$mealId': {
-      id: '/_app/_index/$mealId'
-      path: '/$mealId'
-      fullPath: '/$mealId'
-      preLoaderRoute: typeof AppIndexMealIdRouteImport
-      parentRoute: typeof AppIndexRoute
-    }
   }
 }
-
-interface AppIndexRouteChildren {
-  AppIndexMealIdRoute: typeof AppIndexMealIdRoute
-  AppIndexAddRoute: typeof AppIndexAddRoute
-  AppIndexIndexRoute: typeof AppIndexIndexRoute
-}
-
-const AppIndexRouteChildren: AppIndexRouteChildren = {
-  AppIndexMealIdRoute: AppIndexMealIdRoute,
-  AppIndexAddRoute: AppIndexAddRoute,
-  AppIndexIndexRoute: AppIndexIndexRoute,
-}
-
-const AppIndexRouteWithChildren = AppIndexRoute._addFileChildren(
-  AppIndexRouteChildren,
-)
 
 interface AppCalendarRouteChildren {
   AppCalendarMealIdRoute: typeof AppCalendarMealIdRoute
@@ -208,19 +198,33 @@ const AppCalendarRouteWithChildren = AppCalendarRoute._addFileChildren(
   AppCalendarRouteChildren,
 )
 
+interface AppMealRouteChildren {
+  AppMealMealIdRoute: typeof AppMealMealIdRoute
+  AppMealAddRoute: typeof AppMealAddRoute
+}
+
+const AppMealRouteChildren: AppMealRouteChildren = {
+  AppMealMealIdRoute: AppMealMealIdRoute,
+  AppMealAddRoute: AppMealAddRoute,
+}
+
+const AppMealRouteWithChildren =
+  AppMealRoute._addFileChildren(AppMealRouteChildren)
+
 interface AppRouteChildren {
-  AppIndexRoute: typeof AppIndexRouteWithChildren
   AppCalendarRoute: typeof AppCalendarRouteWithChildren
+  AppMealRoute: typeof AppMealRouteWithChildren
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppIndexRoute: AppIndexRouteWithChildren,
   AppCalendarRoute: AppCalendarRouteWithChildren,
+  AppMealRoute: AppMealRouteWithChildren,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
 }
 export const routeTree = rootRouteImport

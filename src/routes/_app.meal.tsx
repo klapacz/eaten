@@ -23,7 +23,7 @@ import { mealTypeToDisplayText } from '@/schemas/meal'
 import { Link } from '@/components/ui/link'
 import AppSidebarNav from './-app-sidebar-nav'
 
-export const Route = createFileRoute('/_app/_index')({
+export const Route = createFileRoute('/_app/meal')({
   component: App,
 })
 
@@ -41,14 +41,14 @@ function App() {
       <div className="flex gap-2">
         <VoiceRecorder
           onOpen={({ mealId }) => {
-            void navigate({ to: '/$mealId', params: { mealId } })
+            void navigate({ to: '/meal/$mealId', params: { mealId } })
           }}
         >
           <Button size="sq-md" isCircle>
             <IconVoice />
           </Button>
         </VoiceRecorder>
-        <Link to="/add" className={buttonStyles({ intent: 'secondary' })}>
+        <Link to="/meal/add" className={buttonStyles({ intent: 'secondary' })}>
           Create meal
         </Link>
       </div>
@@ -67,7 +67,7 @@ function App() {
           {(meal) => {
             const dt = Temporal.PlainDateTime.from(meal.datetime)
             return (
-              <TableRowLink to="/$mealId" params={{ mealId: meal.id }}>
+              <TableRowLink to="/meal/$mealId" params={{ mealId: meal.id }}>
                 <Table.Cell>
                   {dt.toLocaleString(undefined, {
                     dateStyle: 'short',

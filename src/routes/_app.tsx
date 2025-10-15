@@ -61,12 +61,13 @@ export default function AppSidebar(
       <SidebarContent>
         <SidebarSectionGroup>
           <SidebarSection label="Overview">
-            <SidebarItem tooltip="Overview" isCurrent to="/calendar">
+            {/* TODO: `to` not typed in SidebarItem */}
+            <SidebarItem tooltip="Overview" to="/calendar">
               <IconCalendar />
               <SidebarLabel>Calendar</SidebarLabel>
             </SidebarItem>
 
-            <SidebarItem tooltip="Overview" isCurrent to="/">
+            <SidebarItem tooltip="Overview" to="/meal">
               <IconCalendar />
               <SidebarLabel>Meals</SidebarLabel>
             </SidebarItem>
