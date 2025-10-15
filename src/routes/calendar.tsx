@@ -1,8 +1,4 @@
-import {
-  GridList,
-  GridListEmptyState,
-  GridListItem,
-} from '@/components/ui/grid-list'
+import { GridList, GridListEmptyState } from '@/components/ui/grid-list'
 import { mealCollection } from '@/db-collections'
 import { cn } from '@/lib/utils'
 import { Meal, mealTypeToDisplayText } from '@/schemas/meal'
@@ -10,7 +6,9 @@ import { like, useLiveQuery } from '@tanstack/react-db'
 import { createFileRoute, createLink, Outlet } from '@tanstack/react-router'
 import { useMemo } from 'react'
 import {
+  Button as ButtonPrimitive,
   GridListItemProps,
+  GridListItem as GridListItemPrimitive,
   isTextDropItem,
   useDragAndDrop,
 } from 'react-aria-components'
@@ -20,6 +18,8 @@ import { VoiceRecorder } from './-voice-recorder'
 import { Button, buttonStyles } from '@/components/ui/button'
 import { IconVoice } from '@intentui/icons'
 import { Link } from '@/components/ui/link'
+import { twMerge } from 'tailwind-merge'
+import { DragIcon } from '@/components/ui/drag-icon'
 
 export const Route = createFileRoute('/calendar')({
   component: RouteComponent,
@@ -44,7 +44,7 @@ function RouteComponent() {
   }, [])
 
   return (
-    <div>
+    <div className="[--gutter:--spacing(4)] p-(--gutter) flex flex-col gap-4">
       <div className="flex gap-2">
         <VoiceRecorder
           onOpen={({ mealId }) => {
@@ -65,7 +65,7 @@ function RouteComponent() {
 
       <Outlet />
 
-      <div className="grid auto-cols-[200px] grid-flow-col gap-2 overflow-x-auto divide-x">
+      <div className="grid auto-cols-[200px] grid-flow-col overflow-x-auto -mx-(--gutter) px-(--gutter)">
         {days.map((day) => (
           <Day day={day} key={day.date.toString()} />
         ))}
@@ -135,8 +135,13 @@ function Day({ day }: { day: DayType }) {
   })
 
   return (
-    <div>
-      <div className={cn('p-2 text-center', !day.isToday && 'text-muted-fg')}>
+    <div className="flex flex-col group">
+      <div
+        className={cn(
+          'p-2 text-center group-first:pl-0 group-last:pr-0 border-b border-border/50',
+          !day.isToday && 'text-muted-fg',
+        )}
+      >
         {day.date.toLocaleString('en-US', {
           weekday: 'short',
           day: 'numeric',
@@ -145,11 +150,11 @@ function Day({ day }: { day: DayType }) {
 
       <GridList
         aria-label={`Meal List ${day.date.toLocaleString('en-US', { weekday: 'long' })}`}
-        className="flex flex-col gap-2 p-2"
+        className="flex flex-1 flex-col gap-2 p-2 group-first:pl-0 group-last:pr-0 group-not-last:border-r border-border/50"
         items={meals.data}
         dragAndDropHooks={dragAndDropHooks}
         renderEmptyState={() => (
-          <GridListEmptyState className="text-center text-muted-fg text-sm">
+          <GridListEmptyState className="text-center text-muted-fg text-sm ">
             No meals
           </GridListEmptyState>
         )}
@@ -160,14 +165,21 @@ function Day({ day }: { day: DayType }) {
   )
 }
 
+const GridListItemLink = createLink(GridListItemPrimitive)
+
 function MealCard({ meal, ...props }: { meal: Meal } & GridListItemProps) {
   const date = Temporal.PlainDateTime.from(meal.datetime)
   return (
     <GridListItemLink
-      from={Route.fullPath}
+      className={twMerge([
+        'relative min-w-0 outline-hidden',
+        'border rounded-lg',
+        'p-2 flex flex-col gap-2 bg-white',
+        'dragging:cursor-grab dragging:opacity-70 dragging:**:[[slot=drag]]:text-(--grid-list-item-text-active)',
+        'hover:bg-accent focus focus-visible:bg-accent selected:bg-accent',
+      ])}
       to="/calendar/$mealId"
       params={{ mealId: meal.id }}
-      className="p-2 flex-col gap-2 bg-white"
       aria-label={`Meal ${meal.id}`}
       textValue={`Meal ${meal.id}`}
       key={meal.id}
@@ -182,12 +194,13 @@ function MealCard({ meal, ...props }: { meal: Meal } & GridListItemProps) {
       <div className="text-muted-fg text-sm flex gap-1">
         <div>{mealTypeToDisplayText[meal.type]}</div> ·
         <div>{date.toLocaleString('en-US', { timeStyle: 'short' })}</div>
+        <ButtonPrimitive slot="drag" className="ml-auto">
+          <DragIcon />
+        </ButtonPrimitive>
       </div>
     </GridListItemLink>
   )
 }
-
-const GridListItemLink = createLink(GridListItem)
 
 function getDaysInInterval(interval: Interval<Temporal.PlainDate>) {
   const days = []
