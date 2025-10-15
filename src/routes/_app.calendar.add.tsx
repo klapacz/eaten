@@ -2,7 +2,7 @@ import { Sheet } from '@/components/ui/sheet'
 import { createFileRoute } from '@tanstack/react-router'
 import { CreateMealSheetContent } from './-shared'
 
-export const Route = createFileRoute('/_index/add')({
+export const Route = createFileRoute('/_app/calendar/add')({
   component: RouteComponent,
 })
 
@@ -12,7 +12,9 @@ function RouteComponent() {
   return (
     <Sheet
       isOpen={true}
-      onOpenChange={() => navigate({ to: '/', viewTransition: true })}
+      onOpenChange={() =>
+        navigate({ to: '/calendar', viewTransition: true, search: true })
+      }
     >
       <Sheet.Content>
         {({ close }) => <CreateMealSheetContent close={close} />}

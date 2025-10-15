@@ -18,8 +18,6 @@ import {
   type DisclosureProps,
   Header,
   Heading,
-  type LinkProps,
-  type LinkRenderProps,
   Separator,
   type SeparatorProps as SidebarSeparatorProps,
   Text,
@@ -386,17 +384,11 @@ const SidebarSection = ({ className, ...props }: SidebarSectionProps) => {
 }
 
 interface SidebarItemProps
-  extends Omit<React.ComponentProps<typeof Link>, 'children'> {
+  extends Omit<React.ComponentProps<typeof Link>, 'className' | 'children'> {
   isCurrent?: boolean
-  children?:
-    | React.ReactNode
-    | ((
-        values: LinkRenderProps & {
-          defaultChildren: React.ReactNode
-          isCollapsed: boolean
-        },
-      ) => React.ReactNode)
   badge?: string | number | undefined
+  className?: string
+  children: React.ReactNode
   tooltip?: string | React.ComponentProps<typeof TooltipContent>
 }
 
@@ -416,55 +408,45 @@ const SidebarItem = ({
       ref={ref}
       data-slot="sidebar-item"
       aria-current={isCurrent ? 'page' : undefined}
-      className={composeRenderProps(
+      className={twMerge([
+        'cursor-pointer',
+        'relative w-full min-w-0 items-center rounded-lg text-left font-medium text-base/6 text-sidebar-fg',
+        'group/sidebar-item relative col-span-full overflow-hidden focus-visible:outline-hidden',
+        '**:data-[slot=menu-action-trigger]:absolute **:data-[slot=menu-action-trigger]:right-0 **:data-[slot=menu-action-trigger]:flex **:data-[slot=menu-action-trigger]:h-full **:data-[slot=menu-action-trigger]:w-[calc(var(--sidebar-width)-90%)] **:data-[slot=menu-action-trigger]:items-center **:data-[slot=menu-action-trigger]:justify-end **:data-[slot=menu-action-trigger]:pr-2.5 **:data-[slot=menu-action-trigger]:opacity-0 **:data-[slot=menu-action-trigger]:pressed:opacity-100 **:data-[slot=menu-action-trigger]:has-data-focus:opacity-100 **:data-[slot=menu-action-trigger]:focus-visible:opacity-100 hover:**:data-[slot=menu-action-trigger]:opacity-100',
+        '**:data-[slot=icon]:size-5 **:data-[slot=icon]:shrink-0 **:data-[slot=icon]:text-muted-fg sm:**:data-[slot=icon]:size-4',
+        '**:last:data-[slot=icon]:size-5 sm:**:last:data-[slot=icon]:size-4',
+        '**:data-[slot=avatar]:*:size-5 **:data-[slot=avatar]:size-5',
+        'has-[[data-slot=avatar]]:has-[[data-slot=sidebar-label]]:gap-2 has-[[data-slot=icon]]:has-[[data-slot=sidebar-label]]:gap-2',
+        'grid grid-cols-[auto_1fr_1.5rem_0.5rem_auto] p-2 **:last:data-[slot=icon]:ml-auto supports-[grid-template-columns:subgrid]:grid-cols-subgrid sm:text-sm/5',
+        'has-[a]:p-0',
+        '[--sidebar-current-bg:var(--color-sidebar-primary)] [--sidebar-current-fg:var(--color-sidebar-primary-fg)]',
+        // TODO: next line current
+        'data-[status=active]:bg-(--sidebar-current-bg)/90 data-[status=active]:font-medium data-[status=active]:text-(--sidebar-current-fg) data-[status=active]:hover:bg-(--sidebar-current-bg) data-[status=active]:hover:text-(--sidebar-current-fg) data-[status=active]:**:data-[slot=icon]:text-(--sidebar-current-fg) data-[status=active]:hover:**:data-[slot=icon]:text-(--sidebar-current-fg) data-[status=active]:[&_.text-muted-fg]:text-sidebar-primary-fg/80',
+        'focus-visible:inset-ring focus-visible:inset-ring-sidebar-ring focus-visible:outline-hidden',
+        // Pressed and hovered are the same
+        'pressed:bg-sidebar-accent pressed:text-sidebar-accent-fg pressed:**:data-[slot=icon]:text-text-sidebar-accent-fg',
+        'hover:bg-sidebar-accent hover:text-sidebar-accent-fg hover:**:data-[slot=icon]:text-text-sidebar-accent-fg',
+        'disabled:opacity-50',
         className,
-        (className, { isPressed, isFocusVisible, isHovered, isDisabled }) =>
-          twMerge([
-            'href' in props ? 'cursor-pointer' : 'cursor-default',
-            'relative w-full min-w-0 items-center rounded-lg text-left font-medium text-base/6 text-sidebar-fg',
-            'group/sidebar-item relative col-span-full overflow-hidden focus-visible:outline-hidden',
-            '**:data-[slot=menu-action-trigger]:absolute **:data-[slot=menu-action-trigger]:right-0 **:data-[slot=menu-action-trigger]:flex **:data-[slot=menu-action-trigger]:h-full **:data-[slot=menu-action-trigger]:w-[calc(var(--sidebar-width)-90%)] **:data-[slot=menu-action-trigger]:items-center **:data-[slot=menu-action-trigger]:justify-end **:data-[slot=menu-action-trigger]:pr-2.5 **:data-[slot=menu-action-trigger]:opacity-0 **:data-[slot=menu-action-trigger]:pressed:opacity-100 **:data-[slot=menu-action-trigger]:has-data-focus:opacity-100 **:data-[slot=menu-action-trigger]:focus-visible:opacity-100 hover:**:data-[slot=menu-action-trigger]:opacity-100',
-            '**:data-[slot=icon]:size-5 **:data-[slot=icon]:shrink-0 **:data-[slot=icon]:text-muted-fg sm:**:data-[slot=icon]:size-4',
-            '**:last:data-[slot=icon]:size-5 sm:**:last:data-[slot=icon]:size-4',
-            '**:data-[slot=avatar]:*:size-5 **:data-[slot=avatar]:size-5',
-            'has-[[data-slot=avatar]]:has-[[data-slot=sidebar-label]]:gap-2 has-[[data-slot=icon]]:has-[[data-slot=sidebar-label]]:gap-2',
-            'grid grid-cols-[auto_1fr_1.5rem_0.5rem_auto] p-2 **:last:data-[slot=icon]:ml-auto supports-[grid-template-columns:subgrid]:grid-cols-subgrid sm:text-sm/5',
-            'has-[a]:p-0',
-            '[--sidebar-current-bg:var(--color-sidebar-primary)] [--sidebar-current-fg:var(--color-sidebar-primary-fg)]',
-            isCurrent &&
-              'bg-(--sidebar-current-bg)/90 font-medium text-(--sidebar-current-fg) hover:bg-(--sidebar-current-bg) hover:text-(--sidebar-current-fg) **:data-[slot=icon]:text-(--sidebar-current-fg) hover:**:data-[slot=icon]:text-(--sidebar-current-fg) [&_.text-muted-fg]:text-sidebar-primary-fg/80',
-            isFocusVisible &&
-              'inset-ring inset-ring-sidebar-ring outline-hidden',
-            (isPressed || isHovered) &&
-              'bg-sidebar-accent text-sidebar-accent-fg **:data-[slot=icon]:text-text-sidebar-accent-fg',
-            isDisabled && 'opacity-50',
-            className,
-          ]),
-      )}
+      ])}
       {...props}
     >
-      {(values) => (
-        <>
-          {typeof children === 'function'
-            ? children({ ...values, isCollapsed })
-            : children}
+      {children}
 
-          {badge &&
-            (state !== 'collapsed' ? (
-              <span
-                data-slot="sidebar-badge"
-                className="-translate-y-1/2 absolute inset-ring-1 inset-ring-sidebar-border inset-y-1/2 right-1.5 h-5.5 w-auto rounded-full bg-fg/5 px-2 text-[10px]/5.5 transition-colors group-hover/sidebar-item:inset-ring-muted-fg/30 group-data-current:inset-ring-transparent"
-              >
-                {badge}
-              </span>
-            ) : (
-              <div
-                aria-hidden
-                className="absolute top-1 right-1 size-1.5 rounded-full bg-primary"
-              />
-            ))}
-        </>
-      )}
+      {badge &&
+        (state !== 'collapsed' ? (
+          <span
+            data-slot="sidebar-badge"
+            className="-translate-y-1/2 absolute inset-ring-1 inset-ring-sidebar-border inset-y-1/2 right-1.5 h-5.5 w-auto rounded-full bg-fg/5 px-2 text-[10px]/5.5 transition-colors group-hover/sidebar-item:inset-ring-muted-fg/30 group-data-current:inset-ring-transparent"
+          >
+            {badge}
+          </span>
+        ) : (
+          <div
+            aria-hidden
+            className="absolute top-1 right-1 size-1.5 rounded-full bg-primary"
+          />
+        ))}
     </Link>
   )
   if (typeof tooltip === 'string') {
@@ -488,7 +470,7 @@ const SidebarItem = ({
   )
 }
 
-interface SidebarLinkProps extends LinkProps {
+interface SidebarLinkProps extends React.ComponentProps<typeof Link> {
   ref?: React.RefObject<HTMLAnchorElement>
 }
 

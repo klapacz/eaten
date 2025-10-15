@@ -6,7 +6,7 @@ import { twJoin, twMerge } from 'tailwind-merge'
 import { useMediaQuery } from '@/hooks/use-media-query'
 import { cx } from '@/lib/primitive'
 import { Button, type ButtonProps } from './button'
-import { Link, type LinkProps } from './link'
+import { Link } from './link'
 import { Separator } from './separator'
 import { Sheet } from './sheet'
 
@@ -179,7 +179,7 @@ const NavbarSection = ({
   )
 }
 
-interface NavbarItemProps extends LinkProps {
+interface NavbarItemProps extends React.ComponentProps<typeof Link> {
   isCurrent?: boolean
 }
 
@@ -213,7 +213,7 @@ const NavbarItem = ({ className, isCurrent, ...props }: NavbarItemProps) => {
             ? props.children(values)
             : props.children}
 
-          {(isCurrent || values.isCurrent) && (
+          {(isCurrent || values.isActive) && (
             <span
               data-navbar="current-indicator"
               className={twJoin(

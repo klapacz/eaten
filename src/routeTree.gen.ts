@@ -9,74 +9,80 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/_index'
-import { Route as CalendarRouteImport } from './routes/calendar'
-import { Route as IndexIndexRouteImport } from './routes/_index.index'
-import { Route as CalendarAddRouteImport } from './routes/calendar.add'
-import { Route as CalendarMealIdRouteImport } from './routes/calendar.$mealId'
-import { Route as IndexAddRouteImport } from './routes/_index.add'
-import { Route as IndexMealIdRouteImport } from './routes/_index.$mealId'
+import { Route as AppRouteImport } from './routes/_app'
+import { Route as AppIndexRouteImport } from './routes/_app._index'
+import { Route as AppCalendarRouteImport } from './routes/_app.calendar'
+import { Route as AppIndexIndexRouteImport } from './routes/_app._index.index'
+import { Route as AppCalendarAddRouteImport } from './routes/_app.calendar.add'
+import { Route as AppCalendarMealIdRouteImport } from './routes/_app.calendar.$mealId'
+import { Route as AppIndexAddRouteImport } from './routes/_app._index.add'
+import { Route as AppIndexMealIdRouteImport } from './routes/_app._index.$mealId'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/_index',
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CalendarRoute = CalendarRouteImport.update({
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/_index',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCalendarRoute = AppCalendarRouteImport.update({
   id: '/calendar',
   path: '/calendar',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
-const IndexIndexRoute = IndexIndexRouteImport.update({
+const AppIndexIndexRoute = AppIndexIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => IndexRoute,
+  getParentRoute: () => AppIndexRoute,
 } as any)
-const CalendarAddRoute = CalendarAddRouteImport.update({
+const AppCalendarAddRoute = AppCalendarAddRouteImport.update({
   id: '/add',
   path: '/add',
-  getParentRoute: () => CalendarRoute,
+  getParentRoute: () => AppCalendarRoute,
 } as any)
-const CalendarMealIdRoute = CalendarMealIdRouteImport.update({
+const AppCalendarMealIdRoute = AppCalendarMealIdRouteImport.update({
   id: '/$mealId',
   path: '/$mealId',
-  getParentRoute: () => CalendarRoute,
+  getParentRoute: () => AppCalendarRoute,
 } as any)
-const IndexAddRoute = IndexAddRouteImport.update({
+const AppIndexAddRoute = AppIndexAddRouteImport.update({
   id: '/add',
   path: '/add',
-  getParentRoute: () => IndexRoute,
+  getParentRoute: () => AppIndexRoute,
 } as any)
-const IndexMealIdRoute = IndexMealIdRouteImport.update({
+const AppIndexMealIdRoute = AppIndexMealIdRouteImport.update({
   id: '/$mealId',
   path: '/$mealId',
-  getParentRoute: () => IndexRoute,
+  getParentRoute: () => AppIndexRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/calendar': typeof CalendarRouteWithChildren
-  '/$mealId': typeof IndexMealIdRoute
-  '/add': typeof IndexAddRoute
-  '/calendar/$mealId': typeof CalendarMealIdRoute
-  '/calendar/add': typeof CalendarAddRoute
-  '/': typeof IndexIndexRoute
+  '/calendar': typeof AppCalendarRouteWithChildren
+  '/$mealId': typeof AppIndexMealIdRoute
+  '/add': typeof AppIndexAddRoute
+  '/calendar/$mealId': typeof AppCalendarMealIdRoute
+  '/calendar/add': typeof AppCalendarAddRoute
+  '/': typeof AppIndexIndexRoute
 }
 export interface FileRoutesByTo {
-  '/calendar': typeof CalendarRouteWithChildren
-  '/$mealId': typeof IndexMealIdRoute
-  '/add': typeof IndexAddRoute
-  '/calendar/$mealId': typeof CalendarMealIdRoute
-  '/calendar/add': typeof CalendarAddRoute
-  '/': typeof IndexIndexRoute
+  '/calendar': typeof AppCalendarRouteWithChildren
+  '/$mealId': typeof AppIndexMealIdRoute
+  '/add': typeof AppIndexAddRoute
+  '/calendar/$mealId': typeof AppCalendarMealIdRoute
+  '/calendar/add': typeof AppCalendarAddRoute
+  '/': typeof AppIndexIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/_index': typeof IndexRouteWithChildren
-  '/calendar': typeof CalendarRouteWithChildren
-  '/_index/$mealId': typeof IndexMealIdRoute
-  '/_index/add': typeof IndexAddRoute
-  '/calendar/$mealId': typeof CalendarMealIdRoute
-  '/calendar/add': typeof CalendarAddRoute
-  '/_index/': typeof IndexIndexRoute
+  '/_app': typeof AppRouteWithChildren
+  '/_app/_index': typeof AppIndexRouteWithChildren
+  '/_app/calendar': typeof AppCalendarRouteWithChildren
+  '/_app/_index/$mealId': typeof AppIndexMealIdRoute
+  '/_app/_index/add': typeof AppIndexAddRoute
+  '/_app/calendar/$mealId': typeof AppCalendarMealIdRoute
+  '/_app/calendar/add': typeof AppCalendarAddRoute
+  '/_app/_index/': typeof AppIndexIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -97,105 +103,125 @@ export interface FileRouteTypes {
     | '/'
   id:
     | '__root__'
-    | '/_index'
-    | '/calendar'
-    | '/_index/$mealId'
-    | '/_index/add'
-    | '/calendar/$mealId'
-    | '/calendar/add'
-    | '/_index/'
+    | '/_app'
+    | '/_app/_index'
+    | '/_app/calendar'
+    | '/_app/_index/$mealId'
+    | '/_app/_index/add'
+    | '/_app/calendar/$mealId'
+    | '/_app/calendar/add'
+    | '/_app/_index/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRouteWithChildren
-  CalendarRoute: typeof CalendarRouteWithChildren
+  AppRoute: typeof AppRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/_index': {
-      id: '/_index'
+    '/_app': {
+      id: '/_app'
       path: ''
       fullPath: ''
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/calendar': {
-      id: '/calendar'
+    '/_app/_index': {
+      id: '/_app/_index'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/calendar': {
+      id: '/_app/calendar'
       path: '/calendar'
       fullPath: '/calendar'
-      preLoaderRoute: typeof CalendarRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppCalendarRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/_index/': {
-      id: '/_index/'
+    '/_app/_index/': {
+      id: '/_app/_index/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexIndexRouteImport
-      parentRoute: typeof IndexRoute
+      preLoaderRoute: typeof AppIndexIndexRouteImport
+      parentRoute: typeof AppIndexRoute
     }
-    '/calendar/add': {
-      id: '/calendar/add'
+    '/_app/calendar/add': {
+      id: '/_app/calendar/add'
       path: '/add'
       fullPath: '/calendar/add'
-      preLoaderRoute: typeof CalendarAddRouteImport
-      parentRoute: typeof CalendarRoute
+      preLoaderRoute: typeof AppCalendarAddRouteImport
+      parentRoute: typeof AppCalendarRoute
     }
-    '/calendar/$mealId': {
-      id: '/calendar/$mealId'
+    '/_app/calendar/$mealId': {
+      id: '/_app/calendar/$mealId'
       path: '/$mealId'
       fullPath: '/calendar/$mealId'
-      preLoaderRoute: typeof CalendarMealIdRouteImport
-      parentRoute: typeof CalendarRoute
+      preLoaderRoute: typeof AppCalendarMealIdRouteImport
+      parentRoute: typeof AppCalendarRoute
     }
-    '/_index/add': {
-      id: '/_index/add'
+    '/_app/_index/add': {
+      id: '/_app/_index/add'
       path: '/add'
       fullPath: '/add'
-      preLoaderRoute: typeof IndexAddRouteImport
-      parentRoute: typeof IndexRoute
+      preLoaderRoute: typeof AppIndexAddRouteImport
+      parentRoute: typeof AppIndexRoute
     }
-    '/_index/$mealId': {
-      id: '/_index/$mealId'
+    '/_app/_index/$mealId': {
+      id: '/_app/_index/$mealId'
       path: '/$mealId'
       fullPath: '/$mealId'
-      preLoaderRoute: typeof IndexMealIdRouteImport
-      parentRoute: typeof IndexRoute
+      preLoaderRoute: typeof AppIndexMealIdRouteImport
+      parentRoute: typeof AppIndexRoute
     }
   }
 }
 
-interface IndexRouteChildren {
-  IndexMealIdRoute: typeof IndexMealIdRoute
-  IndexAddRoute: typeof IndexAddRoute
-  IndexIndexRoute: typeof IndexIndexRoute
+interface AppIndexRouteChildren {
+  AppIndexMealIdRoute: typeof AppIndexMealIdRoute
+  AppIndexAddRoute: typeof AppIndexAddRoute
+  AppIndexIndexRoute: typeof AppIndexIndexRoute
 }
 
-const IndexRouteChildren: IndexRouteChildren = {
-  IndexMealIdRoute: IndexMealIdRoute,
-  IndexAddRoute: IndexAddRoute,
-  IndexIndexRoute: IndexIndexRoute,
+const AppIndexRouteChildren: AppIndexRouteChildren = {
+  AppIndexMealIdRoute: AppIndexMealIdRoute,
+  AppIndexAddRoute: AppIndexAddRoute,
+  AppIndexIndexRoute: AppIndexIndexRoute,
 }
 
-const IndexRouteWithChildren = IndexRoute._addFileChildren(IndexRouteChildren)
-
-interface CalendarRouteChildren {
-  CalendarMealIdRoute: typeof CalendarMealIdRoute
-  CalendarAddRoute: typeof CalendarAddRoute
-}
-
-const CalendarRouteChildren: CalendarRouteChildren = {
-  CalendarMealIdRoute: CalendarMealIdRoute,
-  CalendarAddRoute: CalendarAddRoute,
-}
-
-const CalendarRouteWithChildren = CalendarRoute._addFileChildren(
-  CalendarRouteChildren,
+const AppIndexRouteWithChildren = AppIndexRoute._addFileChildren(
+  AppIndexRouteChildren,
 )
 
+interface AppCalendarRouteChildren {
+  AppCalendarMealIdRoute: typeof AppCalendarMealIdRoute
+  AppCalendarAddRoute: typeof AppCalendarAddRoute
+}
+
+const AppCalendarRouteChildren: AppCalendarRouteChildren = {
+  AppCalendarMealIdRoute: AppCalendarMealIdRoute,
+  AppCalendarAddRoute: AppCalendarAddRoute,
+}
+
+const AppCalendarRouteWithChildren = AppCalendarRoute._addFileChildren(
+  AppCalendarRouteChildren,
+)
+
+interface AppRouteChildren {
+  AppIndexRoute: typeof AppIndexRouteWithChildren
+  AppCalendarRoute: typeof AppCalendarRouteWithChildren
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppIndexRoute: AppIndexRouteWithChildren,
+  AppCalendarRoute: AppCalendarRouteWithChildren,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRouteWithChildren,
-  CalendarRoute: CalendarRouteWithChildren,
+  AppRoute: AppRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

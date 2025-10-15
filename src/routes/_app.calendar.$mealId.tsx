@@ -4,7 +4,7 @@ import { eq, useLiveQuery } from '@tanstack/react-db'
 import { createFileRoute } from '@tanstack/react-router'
 import { UpdateMealSheetContent } from './-shared'
 
-export const Route = createFileRoute('/calendar/$mealId')({
+export const Route = createFileRoute('/_app/calendar/$mealId')({
   component: RouteComponent,
 })
 

@@ -25,7 +25,7 @@ import { VisuallyHidden } from '@/components/ui/visually-hidden'
 const today = Temporal.Now.plainDateISO()
 const todayISO = today.toString()
 
-export const Route = createFileRoute('/calendar')({
+export const Route = createFileRoute('/_app/calendar')({
   component: RouteComponent,
   validateSearch: z.object({
     date: z.iso.date().optional().default(todayISO),

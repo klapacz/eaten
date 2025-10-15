@@ -21,8 +21,9 @@ import {
 import { VoiceRecorder } from './-voice-recorder'
 import { mealTypeToDisplayText } from '@/schemas/meal'
 import { Link } from '@/components/ui/link'
+import AppSidebarNav from './-app-sidebar-nav'
 
-export const Route = createFileRoute('/_index')({
+export const Route = createFileRoute('/_app/_index')({
   component: App,
 })
 
@@ -35,7 +36,8 @@ function App() {
   )
 
   return (
-    <div className="container mx-auto flex flex-col gap-6 p-4">
+    <div>
+      <AppSidebarNav />
       <div className="flex gap-2">
         <VoiceRecorder
           onOpen={({ mealId }) => {
