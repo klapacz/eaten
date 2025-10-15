@@ -12,7 +12,9 @@ function RouteComponent() {
   return (
     <Sheet
       isOpen={true}
-      onOpenChange={() => navigate({ to: '/calendar', viewTransition: true })}
+      onOpenChange={() =>
+        navigate({ to: '/calendar', viewTransition: true, search: true })
+      }
     >
       <Sheet.Content>
         {({ close }) => <CreateMealSheetContent close={close} />}

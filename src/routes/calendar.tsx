@@ -4,7 +4,6 @@ import { cn } from '@/lib/utils'
 import { Meal, mealTypeToDisplayText } from '@/schemas/meal'
 import { like, useLiveQuery } from '@tanstack/react-db'
 import { createFileRoute, createLink, Outlet } from '@tanstack/react-router'
-import { useMemo } from 'react'
 import {
   Button as ButtonPrimitive,
   GridListItemProps,
@@ -16,56 +15,95 @@ import { Temporal } from 'temporal-polyfill'
 import { Interval, startOfWeek } from 'vremel'
 import { VoiceRecorder } from './-voice-recorder'
 import { Button, buttonStyles } from '@/components/ui/button'
-import { IconVoice } from '@intentui/icons'
+import { IconChevronLeft, IconChevronRight, IconVoice } from '@intentui/icons'
 import { Link } from '@/components/ui/link'
 import { twMerge } from 'tailwind-merge'
 import { DragIcon } from '@/components/ui/drag-icon'
+import z from 'zod'
+import { VisuallyHidden } from '@/components/ui/visually-hidden'
+
+const today = Temporal.Now.plainDateISO()
+const todayISO = today.toString()
 
 export const Route = createFileRoute('/calendar')({
   component: RouteComponent,
-})
-
-function RouteComponent() {
-  const navigate = Route.useNavigate()
-  const days: DayType[] = useMemo(() => {
-    const today = Temporal.Now.plainDateISO()
-    const weekStart = startOfWeek(today, { firstDayOfWeek: 1 })
+  validateSearch: z.object({
+    date: z.iso.date().optional().default(todayISO),
+  }),
+  loaderDeps: ({ search: { date } }) => ({ dateISO: date }),
+  async loader({ deps: { dateISO } }) {
+    const day = Temporal.PlainDate.from(dateISO)
+    const weekStart = startOfWeek(day, { firstDayOfWeek: 1 })
+    const nextWeek = weekStart.add({ weeks: 1 })
     const weekInterval = {
       start: weekStart,
-      end: weekStart.add({ weeks: 1 }),
+      end: nextWeek,
     }
 
     const days = getDaysInInterval(weekInterval).map((day) => ({
       date: day,
-      isToday: day.equals(today),
+      isToday: today.equals(day),
     }))
 
-    return days
-  }, [])
+    const prevWeek = weekStart.subtract({ weeks: 1 })
+    return { days, nextWeek, prevWeek }
+  },
+})
+
+function RouteComponent() {
+  const navigate = Route.useNavigate()
+  const { days, prevWeek, nextWeek } = Route.useLoaderData()
 
   return (
     <div className="[--gutter:--spacing(4)] p-(--gutter) flex flex-col gap-4">
-      <div className="flex gap-2">
-        <VoiceRecorder
-          onOpen={({ mealId }) => {
-            void navigate({ to: '/calendar/$mealId', params: { mealId } })
-          }}
-        >
-          <Button size="sq-md" isCircle>
-            <IconVoice />
-          </Button>
-        </VoiceRecorder>
-        <Link
-          to="/calendar/add"
-          className={buttonStyles({ intent: 'secondary' })}
-        >
-          Create meal
-        </Link>
+      <div className="flex justify-between gap-2">
+        <div className="flex gap-2">
+          <Link
+            from={Route.fullPath}
+            search={{ date: prevWeek.toString() }}
+            className={buttonStyles({
+              intent: 'secondary',
+              isCircle: true,
+            })}
+          >
+            <IconChevronLeft />
+            <VisuallyHidden>Previous Week</VisuallyHidden>
+          </Link>
+          <Link
+            from={Route.fullPath}
+            search={{ date: nextWeek.toString() }}
+            className={buttonStyles({
+              intent: 'secondary',
+              isCircle: true,
+            })}
+          >
+            <IconChevronRight />
+            <VisuallyHidden>Next Week</VisuallyHidden>
+          </Link>
+        </div>
+        <div className="flex gap-2">
+          <Link
+            to="/calendar/add"
+            search
+            className={buttonStyles({ intent: 'secondary' })}
+          >
+            Create
+          </Link>
+          <VoiceRecorder
+            onOpen={({ mealId }) => {
+              void navigate({ to: '/calendar/$mealId', params: { mealId } })
+            }}
+          >
+            <Button size="sq-md" isCircle>
+              <IconVoice />
+            </Button>
+          </VoiceRecorder>
+        </div>
       </div>
 
       <Outlet />
 
-      <div className="grid auto-cols-[200px] grid-flow-col overflow-x-auto -mx-(--gutter) px-(--gutter)">
+      <div className="grid auto-cols-[minmax(200px,1fr)] grid-flow-col overflow-x-auto -mx-(--gutter) px-(--gutter)">
         {days.map((day) => (
           <Day day={day} key={day.date.toString()} />
         ))}
@@ -180,8 +218,9 @@ function MealCard({ meal, ...props }: { meal: Meal } & GridListItemProps) {
       ])}
       to="/calendar/$mealId"
       params={{ mealId: meal.id }}
-      aria-label={`Meal ${meal.id}`}
-      textValue={`Meal ${meal.id}`}
+      search
+      aria-label={`Meal ${meal.type}`}
+      textValue={`Meal ${meal.type}`}
       key={meal.id}
       {...props}
     >

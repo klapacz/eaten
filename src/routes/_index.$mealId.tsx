@@ -1,7 +1,7 @@
 import { Sheet } from '@/components/ui/sheet'
 import { mealCollection } from '@/db-collections'
 import { eq, useLiveQuery } from '@tanstack/react-db'
-import { createFileRoute, Navigate } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { UpdateMealSheetContent } from './-shared'
 
 export const Route = createFileRoute('/_index/$mealId')({
@@ -21,7 +21,7 @@ function RouteComponent() {
   )
 
   if (!meal) {
-    return <Navigate to="/" />
+    return null
   }
 
   return (
