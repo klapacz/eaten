@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router'
+import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 import {
   IconCalendar,
   IconChevronsY,
@@ -32,9 +32,16 @@ import {
   SidebarSection,
   SidebarSectionGroup,
 } from '@/components/ui/sidebar'
+import { authClient } from '@/auth/client'
 
 export const Route = createFileRoute('/_app')({
   component: RouteComponent,
+  loader: async () => {
+    const session = await authClient.getSession()
+    if (!session.data) {
+      throw redirect({ to: '/auth/login' })
+    }
+  },
 })
 
 function RouteComponent() {

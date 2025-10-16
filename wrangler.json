@@ -1,20 +1,23 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "2025-10-04-meal-list",
+  "name": "eaten",
   "compatibility_date": "2025-09-02",
   "compatibility_flags": ["nodejs_compat"],
   "main": "@tanstack/react-start/server-entry",
   "ai": {
     "binding": "AI"
   },
-  "d1_databases": [
+  "routes": [
     {
-      "binding": "DB",
-      "database_name": "2025-10-04-meal-list",
-      "database_id": "e63e6915-83c6-4a80-9b14-436271f964c2"
+      "pattern": "eaten.klapacz.dev/*",
+      "zone_name": "klapacz.dev"
     }
   ],
-  "vars": {
-    "MY_VAR": "Hello from Cloudflare"
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "invocation_logs": true
+    }
   }
 }

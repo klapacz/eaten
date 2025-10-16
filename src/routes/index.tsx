@@ -1,9 +1,14 @@
-import { createFileRoute, Navigate } from '@tanstack/react-router'
+import { authClient } from '@/auth/client'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/')({
-  component: RouteComponent,
-})
+  loader: async () => {
+    const session = await authClient.getSession()
 
-function RouteComponent() {
-  return <Navigate to="/calendar" />
-}
+    if (!session.data) {
+      throw redirect({ to: '/auth/login' })
+    }
+
+    throw redirect({ to: '/calendar' })
+  },
+})

@@ -3,19 +3,27 @@ import { electricCollectionOptions } from '@tanstack/electric-db-collection'
 import { createServerFn } from '@tanstack/react-start'
 import { DB } from '@/db/client'
 import { mealTable } from '@/db/schema'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { generateTxId } from '@/db/tx'
 import { mealSchema } from '@/schemas/meal'
 import z from 'zod'
+import { AuthContext } from '@/auth/server'
 
 const updateMealServer = createServerFn({ method: 'POST' })
   .inputValidator(mealSchema)
   .handler(async ({ data }) => {
+    const session = await AuthContext.getSession()
+
     return await DB.createTx(async (tx) => {
       const { id, ...rest } = data
 
       const [meal] = await DB.use((db) =>
-        db.select().from(mealTable).where(eq(mealTable.id, id)),
+        db
+          .select()
+          .from(mealTable)
+          .where(
+            and(eq(mealTable.id, id), eq(mealTable.userId, session.user.id)),
+          ),
       )
 
       await DB.use((db) =>
@@ -30,8 +38,12 @@ const updateMealServer = createServerFn({ method: 'POST' })
 const createMealServer = createServerFn({ method: 'POST' })
   .inputValidator(mealSchema)
   .handler(async ({ data }) => {
+    const session = await AuthContext.getSession()
+
     return await DB.createTx(async (tx) => {
-      await DB.use((db) => db.insert(mealTable).values(data))
+      await DB.use((db) =>
+        db.insert(mealTable).values({ ...data, userId: session.user.id }),
+      )
 
       const txid = await generateTxId(tx)
       return { txid }
@@ -41,9 +53,18 @@ const createMealServer = createServerFn({ method: 'POST' })
 const removeMealServer = createServerFn({ method: 'POST' })
   .inputValidator(z.object({ id: z.uuid() }))
   .handler(async ({ data }) => {
+    const session = await AuthContext.getSession()
+
     return await DB.createTx(async (tx) => {
       await DB.use((db) =>
-        db.delete(mealTable).where(eq(mealTable.id, data.id)),
+        db
+          .delete(mealTable)
+          .where(
+            and(
+              eq(mealTable.id, data.id),
+              eq(mealTable.userId, session.user.id),
+            ),
+          ),
       )
 
       const txid = await generateTxId(tx)
@@ -54,7 +75,7 @@ const removeMealServer = createServerFn({ method: 'POST' })
 export const mealCollection = createCollection(
   electricCollectionOptions({
     shapeOptions: {
-      url: 'http://localhost:3000/v1/shape?table=meal&offset=-1',
+      url: new URL('/api/sync/meal', window.location.origin).toString(),
     },
     schema: mealSchema,
     getKey: (item) => item.id,

@@ -13,6 +13,7 @@ import { Temporal } from 'temporal-polyfill'
 import { useIsMutating, useMutation } from '@tanstack/react-query'
 import { useWavesurfer } from '@wavesurfer/react'
 import { toast } from 'sonner'
+import { AuthContext } from '@/auth/server'
 
 type VoiceRecorderInnerProps = {
   onOpen: (data: { mealId: string }) => void
@@ -39,6 +40,7 @@ const transcribeServerFormDataSchema = z.object({
 const transcribeServer = createServerFn({ method: 'POST' })
   .inputValidator(z.instanceof(FormData))
   .handler(async ({ data: _data }) => {
+    const session = await AuthContext.getSession()
     const data = transcribeServerFormDataSchema.parse(
       Object.fromEntries(_data.entries()),
     )
@@ -56,6 +58,7 @@ const transcribeServer = createServerFn({ method: 'POST' })
 
     const schema = createInsertSchema(mealTable).omit({
       id: true,
+      userId: true,
     })
 
     const { object } = await generateObject({
@@ -75,7 +78,11 @@ Instructions:
     console.log({ object })
 
     const [insertedMeal] = await DB.use((db) =>
-      db.insert(mealTable).values(object).returning().execute(),
+      db
+        .insert(mealTable)
+        .values({ ...object, userId: session.user.id })
+        .returning()
+        .execute(),
     )
 
     console.log({ insertedMeal })

@@ -11,8 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthLoginRouteImport } from './routes/auth.login'
 import { Route as AppMealRouteImport } from './routes/_app.meal'
 import { Route as AppCalendarRouteImport } from './routes/_app.calendar'
+import { Route as ApiSyncMealRouteImport } from './routes/api.sync.meal'
+import { Route as ApiAuthSplatRouteImport } from './routes/api.auth.$'
 import { Route as AppMealAddRouteImport } from './routes/_app.meal.add'
 import { Route as AppMealMealIdRouteImport } from './routes/_app.meal.$mealId'
 import { Route as AppCalendarAddRouteImport } from './routes/_app.calendar.add'
@@ -27,6 +30,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/auth/login',
+  path: '/auth/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppMealRoute = AppMealRouteImport.update({
   id: '/meal',
   path: '/meal',
@@ -36,6 +44,16 @@ const AppCalendarRoute = AppCalendarRouteImport.update({
   id: '/calendar',
   path: '/calendar',
   getParentRoute: () => AppRoute,
+} as any)
+const ApiSyncMealRoute = ApiSyncMealRouteImport.update({
+  id: '/api/sync/meal',
+  path: '/api/sync/meal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AppMealAddRoute = AppMealAddRouteImport.update({
   id: '/add',
@@ -62,19 +80,25 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/calendar': typeof AppCalendarRouteWithChildren
   '/meal': typeof AppMealRouteWithChildren
+  '/auth/login': typeof AuthLoginRoute
   '/calendar/$mealId': typeof AppCalendarMealIdRoute
   '/calendar/add': typeof AppCalendarAddRoute
   '/meal/$mealId': typeof AppMealMealIdRoute
   '/meal/add': typeof AppMealAddRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/sync/meal': typeof ApiSyncMealRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/calendar': typeof AppCalendarRouteWithChildren
   '/meal': typeof AppMealRouteWithChildren
+  '/auth/login': typeof AuthLoginRoute
   '/calendar/$mealId': typeof AppCalendarMealIdRoute
   '/calendar/add': typeof AppCalendarAddRoute
   '/meal/$mealId': typeof AppMealMealIdRoute
   '/meal/add': typeof AppMealAddRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/sync/meal': typeof ApiSyncMealRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -82,10 +106,13 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/_app/calendar': typeof AppCalendarRouteWithChildren
   '/_app/meal': typeof AppMealRouteWithChildren
+  '/auth/login': typeof AuthLoginRoute
   '/_app/calendar/$mealId': typeof AppCalendarMealIdRoute
   '/_app/calendar/add': typeof AppCalendarAddRoute
   '/_app/meal/$mealId': typeof AppMealMealIdRoute
   '/_app/meal/add': typeof AppMealAddRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/sync/meal': typeof ApiSyncMealRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -93,34 +120,46 @@ export interface FileRouteTypes {
     | '/'
     | '/calendar'
     | '/meal'
+    | '/auth/login'
     | '/calendar/$mealId'
     | '/calendar/add'
     | '/meal/$mealId'
     | '/meal/add'
+    | '/api/auth/$'
+    | '/api/sync/meal'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/calendar'
     | '/meal'
+    | '/auth/login'
     | '/calendar/$mealId'
     | '/calendar/add'
     | '/meal/$mealId'
     | '/meal/add'
+    | '/api/auth/$'
+    | '/api/sync/meal'
   id:
     | '__root__'
     | '/'
     | '/_app'
     | '/_app/calendar'
     | '/_app/meal'
+    | '/auth/login'
     | '/_app/calendar/$mealId'
     | '/_app/calendar/add'
     | '/_app/meal/$mealId'
     | '/_app/meal/add'
+    | '/api/auth/$'
+    | '/api/sync/meal'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  AuthLoginRoute: typeof AuthLoginRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiSyncMealRoute: typeof ApiSyncMealRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -139,6 +178,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/auth/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app/meal': {
       id: '/_app/meal'
       path: '/meal'
@@ -152,6 +198,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/calendar'
       preLoaderRoute: typeof AppCalendarRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/api/sync/meal': {
+      id: '/api/sync/meal'
+      path: '/api/sync/meal'
+      fullPath: '/api/sync/meal'
+      preLoaderRoute: typeof ApiSyncMealRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_app/meal/add': {
       id: '/_app/meal/add'
@@ -226,6 +286,9 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  AuthLoginRoute: AuthLoginRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiSyncMealRoute: ApiSyncMealRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

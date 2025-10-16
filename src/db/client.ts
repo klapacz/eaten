@@ -12,7 +12,7 @@ export namespace DB {
     ExtractTablesWithRelations<typeof schema>
   >
 
-  type DB = NeonDatabase<typeof schema> & {
+  export type DB = NeonDatabase<typeof schema> & {
     $client: Pool
   }
 
