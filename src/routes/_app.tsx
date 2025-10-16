@@ -3,6 +3,7 @@ import {
   IconCalendar,
   IconChevronsY,
   IconDashboardFill,
+  IconDatabase,
   IconHeadphonesFill,
   IconLogout,
   IconSettingsFill,
@@ -69,13 +70,13 @@ export default function AppSidebar(
         <SidebarSectionGroup>
           <SidebarSection label="Overview">
             {/* TODO: `to` not typed in SidebarItem */}
-            <SidebarItem tooltip="Overview" to="/calendar">
+            <SidebarItem tooltip="Calendar" to="/calendar">
               <IconCalendar />
               <SidebarLabel>Calendar</SidebarLabel>
             </SidebarItem>
 
-            <SidebarItem tooltip="Overview" to="/meal">
-              <IconCalendar />
+            <SidebarItem tooltip="Meals" to="/meal">
+              <IconDatabase />
               <SidebarLabel>Meals</SidebarLabel>
             </SidebarItem>
           </SidebarSection>

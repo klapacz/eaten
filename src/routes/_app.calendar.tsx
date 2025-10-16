@@ -21,6 +21,8 @@ import { twMerge } from 'tailwind-merge'
 import { DragIcon } from '@/components/ui/drag-icon'
 import z from 'zod'
 import { VisuallyHidden } from '@/components/ui/visually-hidden'
+import { SidebarNav, SidebarTrigger } from '@/components/ui/sidebar'
+import { Breadcrumbs } from '@/components/ui/breadcrumbs'
 
 const today = Temporal.Now.plainDateISO()
 const todayISO = today.toString()
@@ -51,64 +53,86 @@ export const Route = createFileRoute('/_app/calendar')({
 })
 
 function RouteComponent() {
-  const navigate = Route.useNavigate()
   const { days, prevWeek, nextWeek } = Route.useLoaderData()
 
   return (
-    <div className="[--gutter:--spacing(4)] p-(--gutter) flex flex-col gap-4">
-      <div className="flex justify-between gap-2">
-        <div className="flex gap-2">
-          <Link
-            from={Route.fullPath}
-            search={{ date: prevWeek.toString() }}
-            className={buttonStyles({
-              intent: 'secondary',
-              isCircle: true,
-            })}
-          >
-            <IconChevronLeft />
-            <VisuallyHidden>Previous Week</VisuallyHidden>
-          </Link>
-          <Link
-            from={Route.fullPath}
-            search={{ date: nextWeek.toString() }}
-            className={buttonStyles({
-              intent: 'secondary',
-              isCircle: true,
-            })}
-          >
-            <IconChevronRight />
-            <VisuallyHidden>Next Week</VisuallyHidden>
-          </Link>
-        </div>
-        <div className="flex gap-2">
-          <Link
-            to="/calendar/add"
-            search
-            className={buttonStyles({ intent: 'secondary' })}
-          >
-            Create
-          </Link>
-          <VoiceRecorder
-            onOpen={({ mealId }) => {
-              void navigate({ to: '/calendar/$mealId', params: { mealId } })
-            }}
-          >
-            <Button size="sq-md" isCircle>
-              <IconVoice />
-            </Button>
-          </VoiceRecorder>
-        </div>
-      </div>
-
+    <div className="flex-1 flex flex-col [--gutter:--spacing(4)]">
+      <Nav prevWeek={prevWeek} nextWeek={nextWeek} />
       <Outlet />
 
-      <div className="grid auto-cols-[minmax(200px,1fr)] grid-flow-col overflow-x-auto -mx-(--gutter) px-(--gutter)">
-        {days.map((day) => (
-          <Day day={day} key={day.date.toString()} />
-        ))}
+      <div className="p-(--gutter) flex-1 flex flex-col">
+        <div className="grid auto-cols-[minmax(200px,1fr)] grid-flow-col overflow-x-auto -mx-(--gutter) px-(--gutter) flex-1">
+          {days.map((day) => (
+            <Day day={day} key={day.date.toString()} />
+          ))}
+        </div>
       </div>
     </div>
+  )
+}
+
+function Nav({
+  prevWeek,
+  nextWeek,
+}: {
+  prevWeek: Temporal.PlainDate
+  nextWeek: Temporal.PlainDate
+}) {
+  const navigate = Route.useNavigate()
+  return (
+    <SidebarNav>
+      <span className="flex items-center gap-x-4">
+        <SidebarTrigger className="-ml-2" />
+        <Breadcrumbs className="hidden md:flex">
+          <Breadcrumbs.Item href="/">Dashboard</Breadcrumbs.Item>
+          <Breadcrumbs.Item>Meals</Breadcrumbs.Item>
+        </Breadcrumbs>
+        <div className="flex justify-between gap-2">
+          <div className="flex gap-2">
+            <Link
+              from={Route.fullPath}
+              search={{ date: prevWeek.toString() }}
+              className={buttonStyles({
+                intent: 'secondary',
+                isCircle: true,
+              })}
+            >
+              <IconChevronLeft />
+              <VisuallyHidden>Previous Week</VisuallyHidden>
+            </Link>
+            <Link
+              from={Route.fullPath}
+              search={{ date: nextWeek.toString() }}
+              className={buttonStyles({
+                intent: 'secondary',
+                isCircle: true,
+              })}
+            >
+              <IconChevronRight />
+              <VisuallyHidden>Next Week</VisuallyHidden>
+            </Link>
+          </div>
+          <div className="flex gap-2">
+            <Link
+              to="/calendar/add"
+              search
+              className={buttonStyles({ intent: 'secondary' })}
+            >
+              Create
+            </Link>
+            <VoiceRecorder
+              onOpen={({ mealId }) => {
+                void navigate({ to: '/calendar/$mealId', params: { mealId } })
+              }}
+            >
+              <Button size="sq-md" isCircle>
+                <IconVoice />
+              </Button>
+            </VoiceRecorder>
+          </div>
+        </div>
+      </span>
+    </SidebarNav>
   )
 }
 
