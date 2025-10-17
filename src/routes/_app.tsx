@@ -27,9 +27,11 @@ import {
   SidebarRail,
   SidebarSection,
   SidebarSectionGroup,
+  useSidebar,
 } from '@/components/ui/sidebar'
 import { authClient } from '@/auth/client'
 import { useMutation } from '@tanstack/react-query'
+import { useActionOnNavigation } from '@/hooks/use-action-on-navigation'
 
 export const Route = createFileRoute('/_app')({
   component: RouteComponent,
@@ -65,6 +67,12 @@ export default function AppSidebar(
     onSuccess() {
       void navigate({ to: '/' })
     },
+  })
+
+  const { setIsOpenOnMobile } = useSidebar()
+
+  useActionOnNavigation(() => {
+    setIsOpenOnMobile(false)
   })
 
   return (
