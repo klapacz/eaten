@@ -4,25 +4,13 @@ import { Table } from '@/components/ui/table'
 import { mealCollection } from '@/db-collections'
 import { useLiveQuery } from '@tanstack/react-db'
 import { createFileRoute, createLink, Outlet } from '@tanstack/react-router'
-import {
-  Menu,
-  MenuContent,
-  MenuItem,
-  MenuSeparator,
-  MenuTrigger,
-} from '@/components/ui/menu'
-import {
-  IconDotsVertical,
-  IconEye,
-  IconHighlight,
-  IconTrash,
-  IconVoice,
-} from '@intentui/icons'
+import { IconDotsVertical, IconVoice } from '@intentui/icons'
 import { VoiceRecorder } from './-voice-recorder'
 import { mealTypeToDisplayText } from '@/schemas/meal'
 import { Link } from '@/components/ui/link'
 import { Breadcrumbs } from '@/components/ui/breadcrumbs'
 import { SidebarNav, SidebarTrigger } from '@/components/ui/sidebar'
+import { MealActionsMenu } from './-shared'
 
 export const Route = createFileRoute('/_app/meal')({
   component: App,
@@ -68,26 +56,9 @@ function App() {
                   <Table.Cell>{mealTypeToDisplayText[meal.type]}</Table.Cell>
                   <Table.Cell>{meal.items.join(', ')}</Table.Cell>
                   <Table.Cell className="text-end last:pr-2.5">
-                    <Menu>
-                      <MenuTrigger>
-                        <IconDotsVertical />
-                      </MenuTrigger>
-                      <MenuContent placement="left top">
-                        <MenuItem>
-                          <IconEye /> View
-                        </MenuItem>
-                        <MenuItem>
-                          <IconHighlight /> Edit
-                        </MenuItem>
-                        <MenuSeparator />
-                        <MenuItem
-                          isDanger
-                          onAction={() => mealCollection.delete(meal.id)}
-                        >
-                          <IconTrash /> Delete
-                        </MenuItem>
-                      </MenuContent>
-                    </Menu>
+                    <MealActionsMenu meal={meal}>
+                      <IconDotsVertical className="touch-target" />
+                    </MealActionsMenu>
                   </Table.Cell>
                 </TableRowLink>
               )

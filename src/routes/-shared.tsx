@@ -1,8 +1,15 @@
 import { Button } from '@/components/ui/button'
 import { mealCollection } from '@/db-collections'
-import { IconTrash } from '@intentui/icons'
+import { IconDuplicate, IconTrash } from '@intentui/icons'
 import z from 'zod'
 import { Sheet } from '@/components/ui/sheet'
+import {
+  Menu,
+  MenuContent,
+  MenuItem,
+  MenuSeparator,
+  MenuTrigger,
+} from '@/components/ui/menu'
 import {
   TanstackForm,
   useAppForm,
@@ -149,9 +156,55 @@ export function UpdateMealSheetContent({
         </Sheet.Body>
         <Sheet.Footer>
           <form.SubscribeButton />
+
+          <MealActionsMenu meal={meal} onDuplicate={close} onDelete={close}>
+            <Button intent="outline" className="w-full">
+              Actions
+            </Button>
+          </MealActionsMenu>
         </Sheet.Footer>
       </TanstackForm>
     </>
+  )
+}
+
+export function MealActionsMenu({
+  meal,
+  children,
+  onDuplicate,
+  onDelete,
+}: React.PropsWithChildren<{
+  meal: Meal
+  onDuplicate?: () => void
+  onDelete?: () => void
+}>) {
+  const handleDelete = async () => {
+    mealCollection.delete(meal.id)
+    close()
+    onDelete?.()
+  }
+
+  const handleDuplicate = async () => {
+    mealCollection.insert({
+      ...meal,
+      id: crypto.randomUUID(),
+    })
+    onDuplicate?.()
+  }
+
+  return (
+    <Menu>
+      <MenuTrigger>{children}</MenuTrigger>
+      <MenuContent placement="bottom start" className="w-full">
+        <MenuItem onAction={handleDuplicate}>
+          <IconDuplicate /> Duplicate
+        </MenuItem>
+        <MenuSeparator />
+        <MenuItem isDanger onAction={handleDelete}>
+          <IconTrash /> Delete
+        </MenuItem>
+      </MenuContent>
+    </Menu>
   )
 }
 
