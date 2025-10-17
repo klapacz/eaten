@@ -1,18 +1,15 @@
 'use client'
 
-import { Breadcrumbs } from '@/components/ui/breadcrumbs'
 import { SidebarNav, SidebarTrigger } from '@/components/ui/sidebar'
 
-export default function AppSidebarNav() {
+export default function AppSidebarNav({
+  children,
+  ...props
+}: React.ComponentProps<typeof SidebarNav>) {
   return (
-    <SidebarNav>
-      <span className="flex items-center gap-x-4">
-        <SidebarTrigger className="-ml-2" />
-        <Breadcrumbs className="hidden md:flex">
-          <Breadcrumbs.Item href="/">Dashboard</Breadcrumbs.Item>
-          <Breadcrumbs.Item>Meals</Breadcrumbs.Item>
-        </Breadcrumbs>
-      </span>
+    <SidebarNav {...props}>
+      <SidebarTrigger className="-ml-2" />
+      <div className="flex justify-between gap-2 grow">{children}</div>
     </SidebarNav>
   )
 }

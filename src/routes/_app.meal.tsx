@@ -6,8 +6,8 @@ import { createFileRoute, createLink, Outlet } from '@tanstack/react-router'
 import { IconDotsVertical } from '@intentui/icons'
 import { mealTypeToDisplayText } from '@/schemas/meal'
 import { Breadcrumbs } from '@/components/ui/breadcrumbs'
-import { SidebarNav, SidebarTrigger } from '@/components/ui/sidebar'
 import { CreateMealButtonGroup, MealActionsMenu } from './-shared'
+import AppSidebarNav from './-app-sidebar-nav'
 
 export const Route = createFileRoute('/_app/meal')({
   component: App,
@@ -22,7 +22,7 @@ function App() {
 
   return (
     <div className="[--gutter:--spacing(4)]">
-      <AppSidebarNav />
+      <PageSidebarNav />
 
       <Outlet />
 
@@ -67,16 +67,12 @@ function App() {
   )
 }
 
-export default function AppSidebarNav() {
+export default function PageSidebarNav() {
   return (
-    <SidebarNav>
-      <span className="flex items-center gap-x-4">
-        <SidebarTrigger className="-ml-2" />
-        <Breadcrumbs className="hidden md:flex">
-          <Breadcrumbs.Item href="/">Dashboard</Breadcrumbs.Item>
-          <Breadcrumbs.Item>Meals</Breadcrumbs.Item>
-        </Breadcrumbs>
-      </span>
+    <AppSidebarNav>
+      <Breadcrumbs>
+        <Breadcrumbs.Item>Meals</Breadcrumbs.Item>
+      </Breadcrumbs>
 
       <CreateMealButtonGroup
         createMealLinkOptions={{ to: '/meal/add', search: true }}
@@ -85,7 +81,7 @@ export default function AppSidebarNav() {
           params: { mealId },
         })}
       />
-    </SidebarNav>
+    </AppSidebarNav>
   )
 }
 

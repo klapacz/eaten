@@ -21,11 +21,11 @@ import { twMerge } from 'tailwind-merge'
 import { DragIcon } from '@/components/ui/drag-icon'
 import z from 'zod'
 import { VisuallyHidden } from '@/components/ui/visually-hidden'
-import { SidebarNav, SidebarTrigger } from '@/components/ui/sidebar'
 import { Breadcrumbs } from '@/components/ui/breadcrumbs'
 import { useMemo } from 'react'
 import { useIsMobile } from '@/hooks/use-is-mobile'
 import { CreateMealButtonGroup } from './-shared'
+import AppSidebarNav from './-app-sidebar-nav'
 
 const today = Temporal.Now.plainDateISO()
 const todayISO = today.toString()
@@ -101,49 +101,44 @@ function Nav({
   }, [prevWeek, nextWeek, isMobile])
 
   return (
-    <SidebarNav>
-      <span className="flex items-center gap-x-4 w-full">
-        <SidebarTrigger className="-ml-2" />
-        <div className="flex justify-between gap-2 grow">
-          <div className="flex gap-2">
-            <Link
-              from={Route.fullPath}
-              search={{ date: prevWeek.toString() }}
-              className={buttonStyles({
-                intent: 'plain',
-                size: 'sm',
-                isCircle: true,
-              })}
-            >
-              <IconChevronLeft />
-              <VisuallyHidden>Previous Week</VisuallyHidden>
-            </Link>
-            <Breadcrumbs>
-              <Breadcrumbs.Item>{dates}</Breadcrumbs.Item>
-            </Breadcrumbs>
-            <Link
-              from={Route.fullPath}
-              search={{ date: nextWeek.toString() }}
-              className={buttonStyles({
-                intent: 'plain',
-                size: 'sm',
-                isCircle: true,
-              })}
-            >
-              <IconChevronRight />
-              <VisuallyHidden>Next Week</VisuallyHidden>
-            </Link>
-          </div>
-          <CreateMealButtonGroup
-            createMealLinkOptions={{ to: '/calendar/add', search: true }}
-            updateMealNavigateOptions={({ mealId }) => ({
-              to: '/calendar/$mealId',
-              params: { mealId },
-            })}
-          />
-        </div>
-      </span>
-    </SidebarNav>
+    <AppSidebarNav>
+      <div className="flex gap-2">
+        <Link
+          from={Route.fullPath}
+          search={{ date: prevWeek.toString() }}
+          className={buttonStyles({
+            intent: 'plain',
+            size: 'sm',
+            isCircle: true,
+          })}
+        >
+          <IconChevronLeft />
+          <VisuallyHidden>Previous Week</VisuallyHidden>
+        </Link>
+        <Breadcrumbs>
+          <Breadcrumbs.Item>{dates}</Breadcrumbs.Item>
+        </Breadcrumbs>
+        <Link
+          from={Route.fullPath}
+          search={{ date: nextWeek.toString() }}
+          className={buttonStyles({
+            intent: 'plain',
+            size: 'sm',
+            isCircle: true,
+          })}
+        >
+          <IconChevronRight />
+          <VisuallyHidden>Next Week</VisuallyHidden>
+        </Link>
+      </div>
+      <CreateMealButtonGroup
+        createMealLinkOptions={{ to: '/calendar/add', search: true }}
+        updateMealNavigateOptions={({ mealId }) => ({
+          to: '/calendar/$mealId',
+          params: { mealId },
+        })}
+      />
+    </AppSidebarNav>
   )
 }
 
