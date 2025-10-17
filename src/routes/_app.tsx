@@ -26,7 +26,6 @@ import {
   SidebarProvider,
   SidebarRail,
   SidebarSection,
-  SidebarSectionGroup,
   useSidebar,
 } from '@/components/ui/sidebar'
 import { authClient } from '@/auth/client'
@@ -83,20 +82,18 @@ export default function AppSidebar(
         </Link>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarSectionGroup>
-          <SidebarSection label="Overview">
-            {/* TODO: `to` not typed in SidebarItem */}
-            <SidebarItem tooltip="Calendar" to="/calendar">
-              <IconCalendar />
-              <SidebarLabel>Calendar</SidebarLabel>
-            </SidebarItem>
+        <SidebarSection label="Main">
+          {/* TODO: `to` not typed in SidebarItem */}
+          <SidebarItem tooltip="Calendar" to="/calendar">
+            <IconCalendar />
+            <SidebarLabel>Calendar</SidebarLabel>
+          </SidebarItem>
 
-            <SidebarItem tooltip="Meals" to="/meal">
-              <IconDatabase />
-              <SidebarLabel>Meals</SidebarLabel>
-            </SidebarItem>
-          </SidebarSection>
-        </SidebarSectionGroup>
+          <SidebarItem tooltip="Meals" to="/meal">
+            <IconDatabase />
+            <SidebarLabel>Meals</SidebarLabel>
+          </SidebarItem>
+        </SidebarSection>
       </SidebarContent>
 
       <SidebarFooter className="flex flex-row justify-between gap-4 group-data-[state=collapsed]:flex-col">
