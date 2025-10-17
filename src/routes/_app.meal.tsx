@@ -21,14 +21,14 @@ import {
 import { VoiceRecorder } from './-voice-recorder'
 import { mealTypeToDisplayText } from '@/schemas/meal'
 import { Link } from '@/components/ui/link'
-import AppSidebarNav from './-app-sidebar-nav'
+import { Breadcrumbs } from '@/components/ui/breadcrumbs'
+import { SidebarNav, SidebarTrigger } from '@/components/ui/sidebar'
 
 export const Route = createFileRoute('/_app/meal')({
   component: App,
 })
 
 function App() {
-  const navigate = Route.useNavigate()
   const meals = useLiveQuery((q) =>
     q
       .from({ meal: mealCollection })
@@ -36,8 +36,81 @@ function App() {
   )
 
   return (
-    <div>
+    <div className="[--gutter:--spacing(4)]">
       <AppSidebarNav />
+
+      <Outlet />
+
+      <div className="p-(--gutter)">
+        <Table aria-label="Meals" bleed>
+          <Table.Header>
+            <Table.Column isRowHeader>Date</Table.Column>
+            <Table.Column>Time</Table.Column>
+            <Table.Column>Type</Table.Column>
+            <Table.Column>Items</Table.Column>
+            <Table.Column />
+          </Table.Header>
+          <Table.Body items={meals.data}>
+            {(meal) => {
+              const dt = Temporal.PlainDateTime.from(meal.datetime)
+              return (
+                <TableRowLink to="/meal/$mealId" params={{ mealId: meal.id }}>
+                  <Table.Cell>
+                    {dt.toLocaleString(undefined, {
+                      dateStyle: 'short',
+                    })}
+                  </Table.Cell>
+                  <Table.Cell>
+                    {dt.toLocaleString(undefined, {
+                      timeStyle: 'short',
+                    })}
+                  </Table.Cell>
+                  <Table.Cell>{mealTypeToDisplayText[meal.type]}</Table.Cell>
+                  <Table.Cell>{meal.items.join(', ')}</Table.Cell>
+                  <Table.Cell className="text-end last:pr-2.5">
+                    <Menu>
+                      <MenuTrigger>
+                        <IconDotsVertical />
+                      </MenuTrigger>
+                      <MenuContent placement="left top">
+                        <MenuItem>
+                          <IconEye /> View
+                        </MenuItem>
+                        <MenuItem>
+                          <IconHighlight /> Edit
+                        </MenuItem>
+                        <MenuSeparator />
+                        <MenuItem
+                          isDanger
+                          onAction={() => mealCollection.delete(meal.id)}
+                        >
+                          <IconTrash /> Delete
+                        </MenuItem>
+                      </MenuContent>
+                    </Menu>
+                  </Table.Cell>
+                </TableRowLink>
+              )
+            }}
+          </Table.Body>
+        </Table>
+      </div>
+    </div>
+  )
+}
+
+export default function AppSidebarNav() {
+  const navigate = Route.useNavigate()
+  return (
+    <SidebarNav>
+      <span className="flex items-center gap-x-4">
+        <SidebarTrigger className="-ml-2" />
+        <Breadcrumbs className="hidden md:flex">
+          <Breadcrumbs.Item href="/">Dashboard</Breadcrumbs.Item>
+          <Breadcrumbs.Item>Meals</Breadcrumbs.Item>
+        </Breadcrumbs>
+      </span>
+
       <div className="flex gap-2">
         <VoiceRecorder
           onOpen={({ mealId }) => {
@@ -52,62 +125,7 @@ function App() {
           Create meal
         </Link>
       </div>
-
-      <Outlet />
-
-      <Table aria-label="Meals">
-        <Table.Header>
-          <Table.Column isRowHeader>Date</Table.Column>
-          <Table.Column>Time</Table.Column>
-          <Table.Column>Type</Table.Column>
-          <Table.Column>Items</Table.Column>
-          <Table.Column />
-        </Table.Header>
-        <Table.Body items={meals.data}>
-          {(meal) => {
-            const dt = Temporal.PlainDateTime.from(meal.datetime)
-            return (
-              <TableRowLink to="/meal/$mealId" params={{ mealId: meal.id }}>
-                <Table.Cell>
-                  {dt.toLocaleString(undefined, {
-                    dateStyle: 'short',
-                  })}
-                </Table.Cell>
-                <Table.Cell>
-                  {dt.toLocaleString(undefined, {
-                    timeStyle: 'short',
-                  })}
-                </Table.Cell>
-                <Table.Cell>{mealTypeToDisplayText[meal.type]}</Table.Cell>
-                <Table.Cell>{meal.items.join(', ')}</Table.Cell>
-                <Table.Cell className="text-end last:pr-2.5">
-                  <Menu>
-                    <MenuTrigger>
-                      <IconDotsVertical />
-                    </MenuTrigger>
-                    <MenuContent placement="left top">
-                      <MenuItem>
-                        <IconEye /> View
-                      </MenuItem>
-                      <MenuItem>
-                        <IconHighlight /> Edit
-                      </MenuItem>
-                      <MenuSeparator />
-                      <MenuItem
-                        isDanger
-                        onAction={() => mealCollection.delete(meal.id)}
-                      >
-                        <IconTrash /> Delete
-                      </MenuItem>
-                    </MenuContent>
-                  </Menu>
-                </Table.Cell>
-              </TableRowLink>
-            )
-          }}
-        </Table.Body>
-      </Table>
-    </div>
+    </SidebarNav>
   )
 }
 
