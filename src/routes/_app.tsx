@@ -30,7 +30,6 @@ import {
 } from '@/components/ui/sidebar'
 import { authClient } from '@/auth/client'
 import { useMutation } from '@tanstack/react-query'
-import { log } from 'node:console'
 
 export const Route = createFileRoute('/_app')({
   component: RouteComponent,

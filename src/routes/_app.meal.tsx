@@ -1,16 +1,13 @@
 import { Temporal } from 'temporal-polyfill'
-import { Button, buttonStyles } from '@/components/ui/button'
 import { Table } from '@/components/ui/table'
 import { mealCollection } from '@/db-collections'
 import { useLiveQuery } from '@tanstack/react-db'
 import { createFileRoute, createLink, Outlet } from '@tanstack/react-router'
-import { IconDotsVertical, IconVoice } from '@intentui/icons'
-import { VoiceRecorder } from './-voice-recorder'
+import { IconDotsVertical } from '@intentui/icons'
 import { mealTypeToDisplayText } from '@/schemas/meal'
-import { Link } from '@/components/ui/link'
 import { Breadcrumbs } from '@/components/ui/breadcrumbs'
 import { SidebarNav, SidebarTrigger } from '@/components/ui/sidebar'
-import { MealActionsMenu } from './-shared'
+import { CreateMealButtonGroup, MealActionsMenu } from './-shared'
 
 export const Route = createFileRoute('/_app/meal')({
   component: App,
@@ -71,7 +68,6 @@ function App() {
 }
 
 export default function AppSidebarNav() {
-  const navigate = Route.useNavigate()
   return (
     <SidebarNav>
       <span className="flex items-center gap-x-4">
@@ -82,20 +78,13 @@ export default function AppSidebarNav() {
         </Breadcrumbs>
       </span>
 
-      <div className="flex gap-2">
-        <VoiceRecorder
-          onOpen={({ mealId }) => {
-            void navigate({ to: '/meal/$mealId', params: { mealId } })
-          }}
-        >
-          <Button size="sq-md" isCircle>
-            <IconVoice />
-          </Button>
-        </VoiceRecorder>
-        <Link to="/meal/add" className={buttonStyles({ intent: 'secondary' })}>
-          Create meal
-        </Link>
-      </div>
+      <CreateMealButtonGroup
+        createMealLinkOptions={{ to: '/meal/add', search: true }}
+        updateMealNavigateOptions={({ mealId }) => ({
+          to: '/meal/$mealId',
+          params: { mealId },
+        })}
+      />
     </SidebarNav>
   )
 }

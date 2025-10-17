@@ -14,14 +14,8 @@ import {
 } from 'react-aria-components'
 import { Temporal } from 'temporal-polyfill'
 import { Interval, startOfWeek, toDateFromClockTime } from 'vremel'
-import { VoiceRecorder } from './-voice-recorder'
-import { Button, buttonStyles } from '@/components/ui/button'
-import {
-  IconChevronLeft,
-  IconChevronRight,
-  IconPlus,
-  IconVoice,
-} from '@intentui/icons'
+import { buttonStyles } from '@/components/ui/button'
+import { IconChevronLeft, IconChevronRight } from '@intentui/icons'
 import { Link } from '@/components/ui/link'
 import { twMerge } from 'tailwind-merge'
 import { DragIcon } from '@/components/ui/drag-icon'
@@ -29,9 +23,9 @@ import z from 'zod'
 import { VisuallyHidden } from '@/components/ui/visually-hidden'
 import { SidebarNav, SidebarTrigger } from '@/components/ui/sidebar'
 import { Breadcrumbs } from '@/components/ui/breadcrumbs'
-import { ButtonGroup } from '@/components/ui/button-group'
-import { useMediaQuery } from '@/hooks/use-media-query'
 import { useMemo } from 'react'
+import { useIsMobile } from '@/hooks/use-is-mobile'
+import { CreateMealButtonGroup } from './-shared'
 
 const today = Temporal.Now.plainDateISO()
 const todayISO = today.toString()
@@ -89,8 +83,7 @@ function Nav({
   nextWeek: Temporal.PlainDate
   weekStart: Temporal.PlainDate
 }) {
-  const navigate = Route.useNavigate()
-  const isMobile = useMediaQuery('(max-width: 40rem)') ?? true
+  const isMobile = useIsMobile()
 
   const dates = useMemo(() => {
     const isCurrentYear = weekStart.year === Temporal.Now.plainDateISO().year
@@ -141,28 +134,13 @@ function Nav({
               <VisuallyHidden>Next Week</VisuallyHidden>
             </Link>
           </div>
-          <ButtonGroup>
-            <Link
-              to="/calendar/add"
-              search
-              className={buttonStyles({
-                intent: 'secondary',
-                size: isMobile ? 'sq-sm' : 'sm',
-              })}
-            >
-              <IconPlus />
-              <span className="max-sm:sr-only">Create</span>
-            </Link>
-            <VoiceRecorder
-              onOpen={({ mealId }) => {
-                void navigate({ to: '/calendar/$mealId', params: { mealId } })
-              }}
-            >
-              <Button size="sq-sm">
-                <IconVoice />
-              </Button>
-            </VoiceRecorder>
-          </ButtonGroup>
+          <CreateMealButtonGroup
+            createMealLinkOptions={{ to: '/calendar/add', search: true }}
+            updateMealNavigateOptions={({ mealId }) => ({
+              to: '/calendar/$mealId',
+              params: { mealId },
+            })}
+          />
         </div>
       </span>
     </SidebarNav>

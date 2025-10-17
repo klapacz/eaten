@@ -75,7 +75,10 @@ const removeMealServer = createServerFn({ method: 'POST' })
 export const mealCollection = createCollection(
   electricCollectionOptions({
     shapeOptions: {
-      url: new URL('/api/sync/meal', window.location.origin).toString(),
+      url:
+        typeof window !== 'undefined'
+          ? new URL('/api/sync/meal', window.location.origin).toString()
+          : '',
     },
     schema: mealSchema,
     getKey: (item) => item.id,
