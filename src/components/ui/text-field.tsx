@@ -9,6 +9,7 @@ import { cx } from '@/lib/primitive'
 import type { FieldProps } from './field'
 import { Description, FieldError, FieldGroup, Input, Label } from './field'
 import { Loader } from './loader'
+import { cn } from '@/lib/utils'
 
 type InputType = Exclude<InputProps['type'], 'password'>
 
@@ -59,7 +60,10 @@ const TextField = ({
           <FieldGroup
             isDisabled={props.isDisabled}
             isInvalid={!!errorMessage}
-            className={isRevealable && 'pr-9'}
+            className={cn(
+              'group-has-data-[slot=suffix-button]:pr-9',
+              isRevealable && 'pr-9',
+            )}
             data-loading={isPending ? 'true' : undefined}
           >
             {prefix && typeof prefix === 'string' ? (

@@ -207,6 +207,7 @@ const FieldGroupMeal = withFieldGroup({
                                   size="sq-xs"
                                   aria-label="New user"
                                   onPress={() => field.removeValue(i)}
+                                  data-slot="suffix-button"
                                   intent="plain"
                                 >
                                   <IconTrash />
