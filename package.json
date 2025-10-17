@@ -8,7 +8,7 @@
     "dev:vite": "vite dev",
     "dev:docker": "docker-compose up",
     "build": "vite build",
-    "serve": "vite preview",
+    "preview": "pnpm run build && vite preview",
     "test": "vitest run",
     "lint": "eslint",
     "format": "prettier --write .",
