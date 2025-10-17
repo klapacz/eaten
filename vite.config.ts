@@ -15,6 +15,7 @@ const config = defineConfig({
     tailwindcss(),
     tanstackStart(),
     viteReact(),
+    // visualizer(), // import { visualizer } from 'rollup-plugin-visualizer'
   ],
 })
 
