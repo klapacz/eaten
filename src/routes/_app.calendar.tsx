@@ -13,10 +13,15 @@ import {
   DropOperation,
 } from 'react-aria-components'
 import { Temporal } from 'temporal-polyfill'
-import { Interval, startOfWeek } from 'vremel'
+import { Interval, startOfWeek, toDateFromClockTime } from 'vremel'
 import { VoiceRecorder } from './-voice-recorder'
 import { Button, buttonStyles } from '@/components/ui/button'
-import { IconChevronLeft, IconChevronRight, IconVoice } from '@intentui/icons'
+import {
+  IconChevronLeft,
+  IconChevronRight,
+  IconPlus,
+  IconVoice,
+} from '@intentui/icons'
 import { Link } from '@/components/ui/link'
 import { twMerge } from 'tailwind-merge'
 import { DragIcon } from '@/components/ui/drag-icon'
@@ -24,6 +29,9 @@ import z from 'zod'
 import { VisuallyHidden } from '@/components/ui/visually-hidden'
 import { SidebarNav, SidebarTrigger } from '@/components/ui/sidebar'
 import { Breadcrumbs } from '@/components/ui/breadcrumbs'
+import { ButtonGroup } from '@/components/ui/button-group'
+import { useMediaQuery } from '@/hooks/use-media-query'
+import { useMemo } from 'react'
 
 const today = Temporal.Now.plainDateISO()
 const todayISO = today.toString()
@@ -49,16 +57,16 @@ export const Route = createFileRoute('/_app/calendar')({
     }))
 
     const prevWeek = weekStart.subtract({ weeks: 1 })
-    return { days, nextWeek, prevWeek }
+    return { days, nextWeek, prevWeek, weekStart }
   },
 })
 
 function RouteComponent() {
-  const { days, prevWeek, nextWeek } = Route.useLoaderData()
+  const { days, prevWeek, nextWeek, weekStart } = Route.useLoaderData()
 
   return (
     <div className="flex-1 flex flex-col [--gutter:--spacing(4)]">
-      <Nav prevWeek={prevWeek} nextWeek={nextWeek} />
+      <Nav prevWeek={prevWeek} nextWeek={nextWeek} weekStart={weekStart} />
       <Outlet />
 
       <div className="p-(--gutter) pb-0 flex-1 flex flex-col">
@@ -75,37 +83,57 @@ function RouteComponent() {
 function Nav({
   prevWeek,
   nextWeek,
+  weekStart,
 }: {
   prevWeek: Temporal.PlainDate
   nextWeek: Temporal.PlainDate
+  weekStart: Temporal.PlainDate
 }) {
   const navigate = Route.useNavigate()
+  const isMobile = useMediaQuery('(max-width: 40rem)') ?? true
+
+  const dates = useMemo(() => {
+    const isCurrentYear = weekStart.year === Temporal.Now.plainDateISO().year
+
+    const dateTimeFormat = new Intl.DateTimeFormat(undefined, {
+      day: 'numeric',
+      month: isMobile ? 'short' : 'long',
+      year: isCurrentYear ? undefined : '2-digit',
+    })
+
+    return dateTimeFormat.formatRange(
+      toDateFromClockTime(weekStart),
+      toDateFromClockTime(nextWeek.subtract({ days: 1 })),
+    )
+  }, [prevWeek, nextWeek, isMobile])
+
   return (
     <SidebarNav>
-      <span className="flex items-center gap-x-4">
+      <span className="flex items-center gap-x-4 w-full">
         <SidebarTrigger className="-ml-2" />
-        <Breadcrumbs className="hidden md:flex">
-          <Breadcrumbs.Item href="/">Dashboard</Breadcrumbs.Item>
-          <Breadcrumbs.Item>Meals</Breadcrumbs.Item>
-        </Breadcrumbs>
-        <div className="flex justify-between gap-2">
+        <div className="flex justify-between gap-2 grow">
           <div className="flex gap-2">
             <Link
               from={Route.fullPath}
               search={{ date: prevWeek.toString() }}
               className={buttonStyles({
-                intent: 'secondary',
+                intent: 'plain',
+                size: 'sm',
                 isCircle: true,
               })}
             >
               <IconChevronLeft />
               <VisuallyHidden>Previous Week</VisuallyHidden>
             </Link>
+            <Breadcrumbs>
+              <Breadcrumbs.Item>{dates}</Breadcrumbs.Item>
+            </Breadcrumbs>
             <Link
               from={Route.fullPath}
               search={{ date: nextWeek.toString() }}
               className={buttonStyles({
-                intent: 'secondary',
+                intent: 'plain',
+                size: 'sm',
                 isCircle: true,
               })}
             >
@@ -113,24 +141,28 @@ function Nav({
               <VisuallyHidden>Next Week</VisuallyHidden>
             </Link>
           </div>
-          <div className="flex gap-2">
+          <ButtonGroup>
             <Link
               to="/calendar/add"
               search
-              className={buttonStyles({ intent: 'secondary' })}
+              className={buttonStyles({
+                intent: 'secondary',
+                size: isMobile ? 'sq-sm' : 'sm',
+              })}
             >
-              Create
+              <IconPlus />
+              <span className="max-sm:sr-only">Create</span>
             </Link>
             <VoiceRecorder
               onOpen={({ mealId }) => {
                 void navigate({ to: '/calendar/$mealId', params: { mealId } })
               }}
             >
-              <Button size="sq-md" isCircle>
+              <Button size="sq-sm">
                 <IconVoice />
               </Button>
             </VoiceRecorder>
-          </div>
+          </ButtonGroup>
         </div>
       </span>
     </SidebarNav>

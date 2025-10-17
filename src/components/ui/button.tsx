@@ -31,17 +31,17 @@ const buttonStyles = tv({
     },
     size: {
       xs: [
-        'min-h-7.5 gap-x-1 px-2.5 py-1.5 text-sm sm:min-h-7 sm:px-2 sm:py-[--spacing(1.4)] sm:text-xs/4',
+        'h-7.5 gap-x-1 px-2.5 py-1.5 text-sm sm:h-7 sm:px-2 sm:py-[--spacing(1.4)] sm:text-xs/4',
         '*:data-[slot=icon]:size-3.5 sm:*:data-[slot=icon]:size-3',
         '*:data-[slot=loader]:size-3.5 sm:*:data-[slot=loader]:size-3',
       ],
       sm: [
-        'min-h-8.5 gap-x-1.5 px-3 py-1.5 text-sm/5 sm:min-h-8 sm:px-2.5 sm:py-1.5',
+        'h-8.5 gap-x-1.5 px-3 py-1.5 text-sm/5 sm:h-8 sm:px-2.5 sm:py-1.5',
         '*:data-[slot=icon]:size-4.5 sm:*:data-[slot=icon]:size-4',
         '*:data-[slot=loader]:size-4.5 sm:*:data-[slot=loader]:size-4',
       ],
       md: [
-        'min-h-9.5 gap-x-2 px-3.5 py-2 sm:min-h-9 sm:px-3 sm:py-1.5 sm:text-sm/6',
+        'h-9.5 gap-x-2 px-3.5 py-2 sm:h-9 sm:px-3 sm:py-1.5 sm:text-sm/6',
         '*:data-[slot=icon]:size-5 sm:*:data-[slot=icon]:size-4',
         '*:data-[slot=loader]:size-5 sm:*:data-[slot=loader]:size-4',
       ],
