@@ -51,7 +51,7 @@ export function CreateMealSheetContent({ close }: { close: () => void }) {
       id: crypto.randomUUID(),
       datetime: toCalendarDateTime(today(getLocalTimeZone()), new Time(12, 0)),
       type: 'BREAKFAST',
-      items: [],
+      items: ['', '', ''],
     }),
     [],
   )
