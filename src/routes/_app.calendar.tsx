@@ -10,6 +10,7 @@ import {
   GridListItem as GridListItemPrimitive,
   isTextDropItem,
   useDragAndDrop,
+  DropOperation,
 } from 'react-aria-components'
 import { Temporal } from 'temporal-polyfill'
 import { Interval, startOfWeek } from 'vremel'
@@ -153,9 +154,6 @@ function Day({ day }: { day: DayType }) {
     // Accept drops with the custom format.
     acceptedDragTypes: ['custom-app-type'],
 
-    // Ensure items are always moved rather than copied.
-    getDropOperation: () => 'move',
-
     getItems(_keys, items) {
       return items.map((item) => {
         return {
@@ -170,15 +168,7 @@ function Day({ day }: { day: DayType }) {
           .filter(isTextDropItem)
           .map(async (item) => await item.getText('custom-app-type')),
       )
-      mealCollection.update(processedItems, (drafts) => {
-        drafts.forEach((draft) => {
-          const time = Temporal.PlainDateTime.from(draft.datetime).toPlainTime()
-          draft.datetime = day.date
-            .toPlainDateTime(time)
-            .toString()
-            .replace('T', ' ')
-        })
-      })
+      handleDrop(e.dropOperation, processedItems, day.date)
     },
 
     async onRootDrop(e) {
@@ -187,12 +177,8 @@ function Day({ day }: { day: DayType }) {
           .filter(isTextDropItem)
           .map(async (item) => await item.getText('custom-app-type')),
       )
-      mealCollection.update(processedItems, (drafts) => {
-        drafts.forEach((draft) => {
-          const time = Temporal.PlainDateTime.from(draft.datetime).toPlainTime()
-          draft.datetime = day.date.toPlainDateTime(time).toString()
-        })
-      })
+
+      handleDrop(e.dropOperation, processedItems, day.date)
     },
   })
 
@@ -225,6 +211,44 @@ function Day({ day }: { day: DayType }) {
       </GridList>
     </div>
   )
+}
+
+function handleDrop(
+  dropOperation: DropOperation,
+  itemIds: string[],
+  targetDate: Temporal.PlainDate,
+) {
+  if (dropOperation === 'move') {
+    mealCollection.update(itemIds, (drafts) => {
+      drafts.forEach((draft) => {
+        const time = Temporal.PlainDateTime.from(draft.datetime).toPlainTime()
+        draft.datetime = targetDate
+          .toPlainDateTime(time)
+          .toString()
+          .replace('T', ' ')
+      })
+    })
+    return
+  }
+
+  if (dropOperation === 'copy') {
+    for (const processedItem of itemIds) {
+      const item = mealCollection.get(processedItem)
+      if (!item) continue
+
+      const time = Temporal.PlainDateTime.from(item.datetime).toPlainTime()
+      const datetime = targetDate
+        .toPlainDateTime(time)
+        .toString()
+        .replace('T', ' ')
+
+      mealCollection.insert({
+        ...item,
+        id: crypto.randomUUID(),
+        datetime,
+      })
+    }
+  }
 }
 
 const GridListItemLink = createLink(GridListItemPrimitive)
