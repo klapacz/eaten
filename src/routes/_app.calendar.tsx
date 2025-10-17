@@ -61,7 +61,7 @@ function RouteComponent() {
       <Nav prevWeek={prevWeek} nextWeek={nextWeek} />
       <Outlet />
 
-      <div className="p-(--gutter) flex-1 flex flex-col">
+      <div className="p-(--gutter) pb-0 flex-1 flex flex-col">
         <div className="grid auto-cols-[minmax(200px,1fr)] grid-flow-col overflow-x-auto -mx-(--gutter) px-(--gutter) flex-1">
           {days.map((day) => (
             <Day day={day} key={day.date.toString()} />
