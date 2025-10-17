@@ -1,19 +1,12 @@
 import React, { useEffect, useRef } from 'react'
 import { Popover, PopoverContent } from '@/components/ui/popover'
 import RecordPlugin from 'wavesurfer.js/dist/plugins/record.esm.js'
-import { env } from 'cloudflare:workers'
-import z from 'zod'
-import { createServerFn, useServerFn } from '@tanstack/react-start'
-import { generateObject } from 'ai'
-import { google } from '@ai-sdk/google'
-import { createInsertSchema } from 'drizzle-zod'
-import { mealTable } from '@/db/schema'
-import { DB } from '@/db/client'
+import { useServerFn } from '@tanstack/react-start'
 import { Temporal } from 'temporal-polyfill'
 import { useIsMutating, useMutation } from '@tanstack/react-query'
 import { useWavesurfer } from '@wavesurfer/react'
 import { toast } from 'sonner'
-import { AuthContext } from '@/auth/server'
+import { transcribeServer } from '@/data/meal'
 
 type VoiceRecorderInnerProps = {
   onOpen: (data: { mealId: string }) => void
@@ -31,64 +24,6 @@ export function VoiceRecorder({ children, ...props }: VoiceRecorderProps) {
     </Popover>
   )
 }
-
-const transcribeServerFormDataSchema = z.object({
-  audio: z.file(),
-  today: z.iso.date(),
-})
-
-const transcribeServer = createServerFn({ method: 'POST' })
-  .inputValidator(z.instanceof(FormData))
-  .handler(async ({ data: _data }) => {
-    const session = await AuthContext.getSession()
-    const data = transcribeServerFormDataSchema.parse(
-      Object.fromEntries(_data.entries()),
-    )
-
-    // https://github.com/craigsdennis/autotranscriber-r2-workers-ai
-    const aBuffer = await data.audio.arrayBuffer()
-    const base64String = Buffer.from(aBuffer).toString('base64')
-
-    const results = await env.AI.run('@cf/openai/whisper-large-v3-turbo', {
-      audio: base64String,
-    })
-
-    const transcript = results.text
-    console.log({ transcript })
-
-    const schema = createInsertSchema(mealTable).omit({
-      id: true,
-      userId: true,
-    })
-
-    const { object } = await generateObject({
-      model: google('gemini-2.5-pro'),
-      schema,
-      prompt: `Extract meal information from this voice transcript: "${transcript}"
-
-Current date: ${data.today}
-
-Instructions:
-- Parse the meal name/description from what the user said
-- If the user mentions a specific date or time (e.g., "yesterday", "this morning", "at 3pm"), calculate the appropriate datetime relative to ${data.today}
-- Extract any mentioned nutritional information or details
-- Be flexible with informal language (e.g., "I had pizza" → meal name: "pizza")`,
-    })
-
-    console.log({ object })
-
-    const [insertedMeal] = await DB.use((db) =>
-      db
-        .insert(mealTable)
-        .values({ ...object, userId: session.user.id })
-        .returning()
-        .execute(),
-    )
-
-    console.log({ insertedMeal })
-
-    return insertedMeal
-  })
 
 const TRANSRIBE_MUTATION_KEY = ['transcribe']
 

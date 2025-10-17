@@ -1,85 +1,22 @@
 import { createCollection } from '@tanstack/react-db'
 import { electricCollectionOptions } from '@tanstack/electric-db-collection'
-import { createServerFn } from '@tanstack/react-start'
-import { DB } from '@/db/client'
-import { mealTable } from '@/db/schema'
-import { and, eq } from 'drizzle-orm'
-import { generateTxId } from '@/db/tx'
 import { mealSchema } from '@/schemas/meal'
-import z from 'zod'
-import { AuthContext } from '@/auth/server'
-
-const updateMealServer = createServerFn({ method: 'POST' })
-  .inputValidator(mealSchema)
-  .handler(async ({ data }) => {
-    const session = await AuthContext.getSession()
-
-    return await DB.createTx(async (tx) => {
-      const { id, ...rest } = data
-
-      const [meal] = await DB.use((db) =>
-        db
-          .select()
-          .from(mealTable)
-          .where(
-            and(eq(mealTable.id, id), eq(mealTable.userId, session.user.id)),
-          ),
-      )
-
-      await DB.use((db) =>
-        db.update(mealTable).set(rest).where(eq(mealTable.id, meal.id)),
-      )
-
-      const txid = await generateTxId(tx)
-      return { txid }
-    })
-  })
-
-const createMealServer = createServerFn({ method: 'POST' })
-  .inputValidator(mealSchema)
-  .handler(async ({ data }) => {
-    const session = await AuthContext.getSession()
-
-    return await DB.createTx(async (tx) => {
-      await DB.use((db) =>
-        db.insert(mealTable).values({ ...data, userId: session.user.id }),
-      )
-
-      const txid = await generateTxId(tx)
-      return { txid }
-    })
-  })
-
-const removeMealServer = createServerFn({ method: 'POST' })
-  .inputValidator(z.object({ id: z.uuid() }))
-  .handler(async ({ data }) => {
-    const session = await AuthContext.getSession()
-
-    return await DB.createTx(async (tx) => {
-      await DB.use((db) =>
-        db
-          .delete(mealTable)
-          .where(
-            and(
-              eq(mealTable.id, data.id),
-              eq(mealTable.userId, session.user.id),
-            ),
-          ),
-      )
-
-      const txid = await generateTxId(tx)
-      return { txid }
-    })
-  })
+import {
+  updateMealServer,
+  createMealServer,
+  removeMealServer,
+} from '@/data/meal'
 
 export const mealCollection = createCollection(
   electricCollectionOptions({
+    id: 'meal_collection',
     shapeOptions: {
       url:
         typeof window !== 'undefined'
           ? new URL('/api/sync/meal', window.location.origin).toString()
           : '',
     },
+
     schema: mealSchema,
     getKey: (item) => item.id,
     onUpdate: async ({ transaction }) => {
