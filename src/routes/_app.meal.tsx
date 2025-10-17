@@ -71,7 +71,9 @@ export default function PageSidebarNav() {
   return (
     <AppSidebarNav>
       <Breadcrumbs>
-        <Breadcrumbs.Item>Meals</Breadcrumbs.Item>
+        <Breadcrumbs.Item linkOptions={{ to: Route.fullPath }}>
+          Meals
+        </Breadcrumbs.Item>
       </Breadcrumbs>
 
       <CreateMealButtonGroup

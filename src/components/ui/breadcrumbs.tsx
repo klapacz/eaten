@@ -1,10 +1,6 @@
 import { IconChevronLgRight } from '@intentui/icons'
 import { createContext, use } from 'react'
-import type {
-  BreadcrumbProps,
-  BreadcrumbsProps,
-  LinkProps,
-} from 'react-aria-components'
+import type { BreadcrumbProps, BreadcrumbsProps } from 'react-aria-components'
 import {
   Breadcrumb,
   Breadcrumbs as BreadcrumbsPrimitive,
@@ -12,6 +8,7 @@ import {
 import { twMerge } from 'tailwind-merge'
 import { cx } from '@/lib/primitive'
 import { Link } from './link'
+import { RegisteredRouter, ValidateLinkOptions } from '@tanstack/react-router'
 
 type BreadcrumbsContextProps = {
   separator?: 'chevron' | 'slash' | boolean
@@ -34,18 +31,22 @@ const Breadcrumbs = <T extends object>({
   )
 }
 
-interface BreadcrumbsItemProps
-  extends BreadcrumbProps,
-    BreadcrumbsContextProps {
-  href?: string
+interface BreadcrumbsItemProps<
+  TRouter extends RegisteredRouter = RegisteredRouter,
+  TOptions = unknown,
+> extends Omit<BreadcrumbProps, 'children'>,
+    BreadcrumbsContextProps,
+    React.PropsWithChildren {
+  linkOptions: ValidateLinkOptions<TRouter, TOptions, string, typeof Link>
 }
 
-const BreadcrumbsItem = ({
-  href,
+const BreadcrumbsItem = <TRouter extends RegisteredRouter, TOptions>({
+  linkOptions,
+  children,
   separator = true,
   className,
   ...props
-}: BreadcrumbsItemProps & Partial<Omit<LinkProps, 'className'>>) => {
+}: BreadcrumbsItemProps<TRouter, TOptions>) => {
   const { separator: contextSeparator } = use(BreadcrumbsProvider)
   separator = contextSeparator ?? separator
   const separatorValue = separator === true ? 'chevron' : separator
@@ -57,7 +58,7 @@ const BreadcrumbsItem = ({
     >
       {({ isCurrent }) => (
         <>
-          <Link href={href} {...props} />
+          <Link {...linkOptions}>{children}</Link>
           {!isCurrent && separator !== false && (
             <Separator separator={separatorValue} />
           )}

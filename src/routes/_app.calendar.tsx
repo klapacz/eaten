@@ -116,7 +116,14 @@ function Nav({
           <VisuallyHidden>Previous Week</VisuallyHidden>
         </Link>
         <Breadcrumbs>
-          <Breadcrumbs.Item>{dates}</Breadcrumbs.Item>
+          <Breadcrumbs.Item
+            linkOptions={{
+              from: Route.fullPath,
+              search: { date: Temporal.Now.plainDateISO().toString() },
+            }}
+          >
+            {dates}
+          </Breadcrumbs.Item>
         </Breadcrumbs>
         <Link
           from={Route.fullPath}
