@@ -1,0 +1,14 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "dev:vite": {
+      "interactive": true,
+      "cache": false
+    },
+    "dev:docker": {
+      "interactive": true,
+      "cache": false
+    }
+  }
+}
