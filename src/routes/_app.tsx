@@ -2,12 +2,8 @@ import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 import {
   IconCalendar,
   IconChevronsY,
-  IconDashboardFill,
   IconDatabase,
-  IconHeadphonesFill,
   IconLogout,
-  IconSettingsFill,
-  IconShieldFill,
 } from '@intentui/icons'
 import { Avatar } from '@/components/ui/avatar'
 import { Link } from '@/components/ui/link'
@@ -17,7 +13,6 @@ import {
   MenuHeader,
   MenuItem,
   MenuSection,
-  MenuSeparator,
   MenuTrigger,
 } from '@/components/ui/menu'
 import {
@@ -34,6 +29,8 @@ import {
   SidebarSectionGroup,
 } from '@/components/ui/sidebar'
 import { authClient } from '@/auth/client'
+import { useMutation } from '@tanstack/react-query'
+import { log } from 'node:console'
 
 export const Route = createFileRoute('/_app')({
   component: RouteComponent,
@@ -42,6 +39,8 @@ export const Route = createFileRoute('/_app')({
     if (!session.data) {
       throw redirect({ to: '/auth/login' })
     }
+
+    return session.data
   },
 })
 
@@ -59,6 +58,16 @@ function RouteComponent() {
 export default function AppSidebar(
   props: React.ComponentProps<typeof Sidebar>,
 ) {
+  const session = Route.useLoaderData()
+  const navigate = Route.useNavigate()
+
+  const logout = useMutation({
+    mutationFn: () => authClient.signOut(),
+    onSuccess() {
+      void navigate({ to: '/' })
+    },
+  })
+
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -93,13 +102,13 @@ export default function AppSidebar(
               <Avatar
                 className="size-8 *:size-8 group-data-[state=collapsed]:size-6 group-data-[state=collapsed]:*:size-6"
                 isSquare
-                src="https://intentui.com/images/avatar/cobain.jpg"
+                initials={session.user.email.slice(0, 2).toUpperCase()}
               />
 
               <div className="in-data-[collapsible=dock]:hidden text-sm">
-                <SidebarLabel>Kurt Cobain</SidebarLabel>
+                <SidebarLabel>{session.user.email.split('@')[0]}</SidebarLabel>
                 <span className="-mt-0.5 block text-muted-fg">
-                  kurt@domain.com
+                  {session.user.email}
                 </span>
               </div>
             </div>
@@ -111,31 +120,19 @@ export default function AppSidebar(
           >
             <MenuSection>
               <MenuHeader separator>
-                <span className="block">Kurt Cobain</span>
-                <span className="font-normal text-muted-fg">@cobain</span>
+                <span className="block">
+                  {session.user.email.split('@')[0]}
+                </span>
+                <span className="font-normal text-muted-fg">
+                  {session.user.email}
+                </span>
               </MenuHeader>
             </MenuSection>
 
-            <MenuItem href="#dashboard">
-              <IconDashboardFill />
-              Dashboard
-            </MenuItem>
-            <MenuItem href="#settings">
-              <IconSettingsFill />
-              Settings
-            </MenuItem>
-            <MenuItem href="#security">
-              <IconShieldFill />
-              Security
-            </MenuItem>
-            <MenuSeparator />
-
-            <MenuItem href="#contact">
-              <IconHeadphonesFill />
-              Customer Support
-            </MenuItem>
-            <MenuSeparator />
-            <MenuItem href="#logout">
+            <MenuItem
+              onAction={() => logout.mutate()}
+              isDisabled={logout.isPending}
+            >
               <IconLogout />
               Log out
             </MenuItem>
