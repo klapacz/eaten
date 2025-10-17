@@ -492,7 +492,7 @@ const SidebarInset = ({
     <main
       ref={ref}
       className={twMerge(
-        'relative flex w-full flex-1 flex-col bg-bg lg:min-w-0',
+        'relative flex w-full flex-1 flex-col bg-bg min-w-0',
         'peer-data-[intent=inset]:border peer-data-[intent=inset]:border-sidebar-border md:peer-data-[intent=inset]:peer-data-[state=collapsed]:ml-2 md:peer-data-[intent=inset]:m-2 md:peer-data-[intent=inset]:ml-0 md:peer-data-[intent=inset]:rounded-2xl',
         'peer-data-[intent=inset]:bg-bg dark:peer-data-[intent=inset]:bg-sidebar',
         className,
