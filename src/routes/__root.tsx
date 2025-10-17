@@ -53,18 +53,20 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         {/* See: https://github.com/adobe/react-spectrum/issues/8920#issuecomment-3383404322 */}
         <RouterProvider navigate={() => {}}>{children}</RouterProvider>
         <Toast />
-        <TanStackDevtools
-          config={{
-            position: 'bottom-right',
-          }}
-          plugins={[
-            {
-              name: 'Tanstack Router',
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-            TanStackQueryDevtools,
-          ]}
-        />
+        {import.meta.env.DEV ? (
+          <TanStackDevtools
+            config={{
+              position: 'bottom-right',
+            }}
+            plugins={[
+              {
+                name: 'Tanstack Router',
+                render: <TanStackRouterDevtoolsPanel />,
+              },
+              TanStackQueryDevtools,
+            ]}
+          />
+        ) : null}
         <Scripts />
       </body>
     </html>
