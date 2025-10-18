@@ -104,6 +104,7 @@ export const mealWithTypeCollection = createCollection(
           items: meal.items,
           datetime: meal.datetime,
           type_name: type.name,
+          type_consider_time: type.consider_time,
         })),
   }),
 )
@@ -113,4 +114,5 @@ export type MealWithType = {
   items: string[]
   datetime: string
   type_name: string
+  type_consider_time: boolean
 }

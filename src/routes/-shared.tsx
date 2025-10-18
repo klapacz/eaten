@@ -18,9 +18,11 @@ import {
   CalendarDateTime,
   getLocalTimeZone,
   parseDateTime,
+  parseTime,
   Time,
   toCalendarDateTime,
   today,
+  toTime,
 } from '@internationalized/date'
 import { useMemo } from 'react'
 import { Select } from '@/components/ui/select'
@@ -38,6 +40,7 @@ import {
 } from '@tanstack/react-router'
 import { VoiceRecorder } from './-voice-recorder'
 import { useLiveQuery } from '@tanstack/react-db'
+import { useStore } from '@tanstack/react-form'
 
 export const validateSearch = z.union([
   z.object({
@@ -69,6 +72,7 @@ export function CreateMealSheetContent({ close }: { close: () => void }) {
     async onSubmit({ value, formApi }) {
       const tx = mealCollection.insert({
         ...value,
+        items: value.items.filter((item) => item.trim() !== ''),
         datetime: value.datetime.toString().replace('T', ' '),
       })
       await tx.isPersisted.promise
@@ -288,13 +292,52 @@ const FieldGroupMeal = withFieldGroup({
         .orderBy(({ type }) => type.default_time, 'asc'),
     )
 
+    const datetime = useStore(group.store, (state) => state.values.datetime)
+
+    const selectedMealTypeId = useStore(
+      group.store,
+      (state) => state.values.meal_type_id,
+    )
+
+    const selectedMealType = useMemo(() => {
+      return meal_types.find((meal_type) => meal_type.id === selectedMealTypeId)
+    }, [meal_types, selectedMealTypeId])
+
     return (
       <>
-        <group.AppField name="datetime">
-          {(field) => <field.DatePicker label="Date and Time" />}
-        </group.AppField>
+        <group.AppField
+          name="meal_type_id"
+          listeners={{
+            onChange({ value }) {
+              const newlySelectedMealType = meal_types.find(
+                (meal_type) => meal_type.id === value,
+              )
+              if (!newlySelectedMealType) return
 
-        <group.AppField name="meal_type_id">
+              const currentTime = toTime(datetime)
+              const previouslySelectedMealType = selectedMealType
+              const previousMealTypeDefaultTime =
+                previouslySelectedMealType &&
+                parseTime(previouslySelectedMealType.default_time)
+
+              const isDefaultNoonTime =
+                currentTime.compare(new Time(12, 0)) === 0
+              const isPreviousMealTypeTime =
+                previousMealTypeDefaultTime &&
+                currentTime.compare(previousMealTypeDefaultTime) === 0
+
+              if (isDefaultNoonTime || isPreviousMealTypeTime) {
+                const newMealTypeDefaultTime = parseTime(
+                  newlySelectedMealType.default_time,
+                )
+                group.setFieldValue(
+                  'datetime',
+                  datetime.set(newMealTypeDefaultTime),
+                )
+              }
+            },
+          }}
+        >
           {(field) => (
             <field.SelectField label="Type">
               <Select.Trigger />
@@ -306,6 +349,15 @@ const FieldGroupMeal = withFieldGroup({
                 )}
               </Select.Content>
             </field.SelectField>
+          )}
+        </group.AppField>
+
+        <group.AppField name="datetime">
+          {(field) => (
+            <field.DatePicker
+              label={selectedMealType?.consider_time ? 'Date and Time' : 'Date'}
+              granularity={selectedMealType?.consider_time ? 'minute' : 'day'}
+            />
           )}
         </group.AppField>
 

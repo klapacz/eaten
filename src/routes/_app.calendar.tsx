@@ -162,6 +162,8 @@ function Day({ day }: { day: DayType }) {
   const meals = useLiveQuery((q) =>
     q
       .from({ meal: mealWithTypeCollection })
+      .orderBy(({ meal }) => meal.type_consider_time, 'desc')
+      .orderBy(({ meal }) => meal.datetime, 'asc')
       .where(({ meal }) => like(meal.datetime, `${day.date.toString()}%`)),
   )
 
@@ -297,8 +299,13 @@ function MealCard({
       </ul>
 
       <div className="text-muted-fg text-sm flex gap-1">
-        <div>{meal.type_name}</div> ·
-        <div>{date.toLocaleString('en-US', { timeStyle: 'short' })}</div>
+        <div>{meal.type_name}</div>
+        {meal.type_consider_time ? (
+          <>
+            {' · '}
+            <div>{date.toLocaleString('en-US', { timeStyle: 'short' })}</div>
+          </>
+        ) : null}
         <ButtonPrimitive slot="drag" className="ml-auto">
           <DragIcon />
         </ButtonPrimitive>
