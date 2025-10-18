@@ -3,6 +3,7 @@ import {
   IconCalendar,
   IconChevronsY,
   IconDatabase,
+  IconGear,
   IconLogout,
 } from '@intentui/icons'
 import { Avatar } from '@/components/ui/avatar'
@@ -92,6 +93,11 @@ export default function AppSidebar(
           <SidebarItem tooltip="Meals" to="/meal">
             <IconDatabase />
             <SidebarLabel>Meals</SidebarLabel>
+          </SidebarItem>
+
+          <SidebarItem tooltip="Meal Types" to="/meal-type">
+            <IconGear />
+            <SidebarLabel>Meal Types</SidebarLabel>
           </SidebarItem>
         </SidebarSection>
       </SidebarContent>

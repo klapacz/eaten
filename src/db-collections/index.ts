@@ -11,6 +11,11 @@ import {
   removeMealServer,
 } from '@/data/meal'
 import { mealTypeSchema } from '@/schemas/meal_type'
+import {
+  updateMealTypeServer,
+  createMealTypeServer,
+  removeMealTypeServer,
+} from '@/data/meal_type'
 
 export const mealCollection = createCollection(
   electricCollectionOptions({
@@ -60,6 +65,27 @@ export const mealTypeCollection = createCollection(
 
     schema: mealTypeSchema,
     getKey: (item) => item.id,
+    onUpdate: async ({ transaction }) => {
+      const originalMealType = transaction.mutations[0].original
+      const modifiedMealType = transaction.mutations[0].modified
+      const response = await updateMealTypeServer({
+        data: { ...modifiedMealType, id: originalMealType.id },
+      })
+
+      return { txid: response.txid }
+    },
+    onInsert: async ({ transaction }) => {
+      const newMealType = transaction.mutations[0].modified
+      const response = await createMealTypeServer({ data: newMealType })
+
+      return { txid: response.txid }
+    },
+    onDelete: async ({ transaction }) => {
+      const deletedMealType = transaction.mutations[0].original
+      const response = await removeMealTypeServer({ data: deletedMealType })
+
+      return { txid: response.txid }
+    },
   }),
 )
 
