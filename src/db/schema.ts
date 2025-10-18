@@ -1,19 +1,35 @@
 import { sql } from 'drizzle-orm'
-import { pgEnum, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import {
+  boolean,
+  pgTable,
+  text,
+  time,
+  timestamp,
+  unique,
+  uuid,
+} from 'drizzle-orm/pg-core'
 import { auth_user } from './auth.schema'
 
-export const mealTypeEnum = pgEnum('MealType', [
-  'BREAKFAST',
-  'BRUNCH',
-  'LUNCH',
-  'AFTERNOON_SNACK',
-  'DINNER',
-])
+export const mealTypeTable = pgTable(
+  'meal_type',
+  {
+    id: uuid().defaultRandom().primaryKey(),
+    defaultTime: time().notNull(),
+    name: text().notNull(),
+    considerTime: boolean().notNull().default(true),
+    userId: text()
+      .notNull()
+      .references(() => auth_user.id),
+  },
+  (t) => [unique().on(t.userId, t.name)],
+)
 
 export const mealTable = pgTable('meal', {
   datetime: timestamp({ mode: 'string' }).notNull(),
+  mealTypeId: uuid()
+    .notNull()
+    .references(() => mealTypeTable.id),
   id: uuid().defaultRandom().primaryKey(),
-  type: mealTypeEnum().notNull(),
   items: text()
     .array()
     .notNull()
