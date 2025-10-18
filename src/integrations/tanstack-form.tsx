@@ -7,6 +7,7 @@ import { NumberField, NumberFieldProps } from '@/components/ui/number-field'
 import { Select, SelectProps } from '@/components/ui/select'
 import { Switch, SwitchProps } from '@/components/ui/switch'
 import { TextField, TextFieldProps } from '@/components/ui/text-field'
+import { TimeField, TimeFieldProps } from '@/components/ui/time-field'
 import {
   AnyFieldApi,
   AnyFormApi,
@@ -15,7 +16,7 @@ import {
   useStore,
 } from '@tanstack/react-form'
 import { useMemo } from 'react'
-import { DateValue, Key } from 'react-aria'
+import { DateValue, Key, TimeValue } from 'react-aria'
 
 export const { fieldContext, formContext, useFieldContext, useFormContext } =
   createFormHookContexts()
@@ -45,6 +46,24 @@ function FormDatePicker<T extends DateValue>(props: DatePickerProps<T>) {
 
   return (
     <DatePicker
+      name={field.name}
+      value={field.state.value}
+      onChange={(newValue) => field.handleChange(newValue as unknown as T)}
+      onBlur={field.handleBlur}
+      isInvalid={!field.state.meta.isValid}
+      errorMessage={errorMessage}
+      {...props}
+    />
+  )
+}
+
+function FormTimeField<T extends TimeValue>(props: TimeFieldProps<T>) {
+  const field = useFieldContext<T>()
+
+  const errorMessage = useErrorMessageFromField(field)
+
+  return (
+    <TimeField
       name={field.name}
       value={field.state.value}
       onChange={(newValue) => field.handleChange(newValue as unknown as T)}
@@ -195,6 +214,7 @@ export const { useAppForm, withFieldGroup } = createFormHook({
     TextField: FormTextField,
     NumberField: FormNumberField,
     DatePicker: FormDatePicker,
+    TimeField: FormTimeField,
     SelectField: FormSelectField,
   },
   formComponents: { SubscribeButton, ServerErrorNote, Debug },
