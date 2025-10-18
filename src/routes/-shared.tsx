@@ -1,5 +1,5 @@
 import { Button, buttonStyles } from '@/components/ui/button'
-import { mealCollection } from '@/db-collections'
+import { mealCollection, mealTypeCollection } from '@/db-collections'
 import { IconDuplicate, IconPlus, IconTrash, IconVoice } from '@intentui/icons'
 import z from 'zod'
 import { Sheet } from '@/components/ui/sheet'
@@ -27,12 +27,7 @@ import { useMemo } from 'react'
 import { Select } from '@/components/ui/select'
 import { fieldStyles } from '@/components/ui/field'
 import { Separator } from '@/components/ui/separator'
-import {
-  Meal,
-  mealSchema,
-  mealTypeSchema,
-  mealTypeToDisplayText,
-} from '@/schemas/meal'
+import { Meal, mealSchema } from '@/schemas/meal'
 import { ButtonGroup } from '@/components/ui/button-group'
 import { Link } from '@/components/ui/link'
 import { useIsMobile } from '@/hooks/use-is-mobile'
@@ -43,6 +38,7 @@ import {
   ValidateNavigateOptions,
 } from '@tanstack/react-router'
 import { VoiceRecorder } from './-voice-recorder'
+import { useLiveQuery } from '@tanstack/react-db'
 
 export const validateSearch = z.union([
   z.object({
@@ -60,7 +56,7 @@ export function CreateMealSheetContent({ close }: { close: () => void }) {
     () => ({
       id: crypto.randomUUID(),
       datetime: toCalendarDateTime(today(getLocalTimeZone()), new Time(12, 0)),
-      type: 'BREAKFAST',
+      meal_type_id: null as never as string,
       items: ['', '', ''],
     }),
     [],
@@ -96,7 +92,7 @@ export function CreateMealSheetContent({ close }: { close: () => void }) {
             fields={{
               id: 'id',
               datetime: 'datetime',
-              type: 'type',
+              meal_type_id: 'meal_type_id',
               items: 'items',
             }}
           />
@@ -135,7 +131,7 @@ export function UpdateMealSheetContent({
       const tx = mealCollection.update(meal.id, (draft) => {
         draft.datetime = value.datetime.toString().replace('T', ' ')
         draft.items = value.items.filter((item) => item.trim() !== '')
-        draft.type = value.type
+        draft.meal_type_id = value.meal_type_id
       })
       await tx.isPersisted.promise
       formApi.reset()
@@ -157,7 +153,7 @@ export function UpdateMealSheetContent({
             fields={{
               id: 'id',
               datetime: 'datetime',
-              type: 'type',
+              meal_type_id: 'meal_type_id',
               items: 'items',
             }}
           />
@@ -167,7 +163,11 @@ export function UpdateMealSheetContent({
         <Sheet.Footer>
           <form.SubscribeButton />
 
-          <MealActionsMenu meal={meal} onDuplicate={close} onDelete={close}>
+          <MealActionsMenu
+            meal_id={meal.id}
+            onDuplicate={close}
+            onDelete={close}
+          >
             <Button intent="outline" className="w-full">
               Actions
             </Button>
@@ -179,22 +179,25 @@ export function UpdateMealSheetContent({
 }
 
 export function MealActionsMenu({
-  meal,
+  meal_id,
   children,
   onDuplicate,
   onDelete,
 }: React.PropsWithChildren<{
-  meal: Meal
+  meal_id: string
   onDuplicate?: () => void
   onDelete?: () => void
 }>) {
   const handleDelete = async () => {
-    mealCollection.delete(meal.id)
+    mealCollection.delete(meal_id)
     close()
     onDelete?.()
   }
 
   const handleDuplicate = async () => {
+    const meal = mealCollection.get(meal_id)
+    if (!meal) return console.error('Meal not found')
+
     mealCollection.insert({
       ...meal,
       id: crypto.randomUUID(),
@@ -282,25 +285,26 @@ const mealFormSchema = mealSchema.extend({
 const FieldGroupMeal = withFieldGroup({
   defaultValues: {} as z.infer<typeof mealFormSchema>,
   render: function Render({ group }) {
+    const { data: meal_types } = useLiveQuery((q) =>
+      q
+        .from({ type: mealTypeCollection })
+        .orderBy(({ type }) => type.default_time, 'asc'),
+    )
+
     return (
       <>
         <group.AppField name="datetime">
           {(field) => <field.DatePicker label="Date and Time" />}
         </group.AppField>
 
-        <group.AppField name="type">
+        <group.AppField name="meal_type_id">
           {(field) => (
             <field.SelectField label="Type">
               <Select.Trigger />
-              <Select.Content
-                items={mealTypeSchema.options.map((id) => ({ id }))}
-              >
-                {(item) => (
-                  <Select.Item
-                    id={item.id}
-                    textValue={mealTypeToDisplayText[item.id]}
-                  >
-                    {mealTypeToDisplayText[item.id]}
+              <Select.Content items={meal_types}>
+                {(meal_type) => (
+                  <Select.Item id={meal_type.id} textValue={meal_type.name}>
+                    {meal_type.name}
                   </Select.Item>
                 )}
               </Select.Content>

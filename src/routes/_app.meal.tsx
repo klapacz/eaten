@@ -1,10 +1,9 @@
 import { Temporal } from 'temporal-polyfill'
 import { Table } from '@/components/ui/table'
-import { mealCollection } from '@/db-collections'
+import { mealWithTypeCollection } from '@/db-collections'
 import { useLiveQuery } from '@tanstack/react-db'
 import { createFileRoute, createLink, Outlet } from '@tanstack/react-router'
 import { IconDotsVertical } from '@intentui/icons'
-import { mealTypeToDisplayText } from '@/schemas/meal'
 import { Breadcrumbs } from '@/components/ui/breadcrumbs'
 import { CreateMealButtonGroup, MealActionsMenu } from './-shared'
 import AppSidebarNav from './-app-sidebar-nav'
@@ -14,11 +13,7 @@ export const Route = createFileRoute('/_app/meal')({
 })
 
 function App() {
-  const meals = useLiveQuery((q) =>
-    q
-      .from({ meal: mealCollection })
-      .orderBy(({ meal }) => meal.datetime, 'desc'),
-  )
+  const meals = useLiveQuery((q) => q.from({ meal: mealWithTypeCollection }))
 
   return (
     <div className="[--gutter:--spacing(4)]">
@@ -50,10 +45,10 @@ function App() {
                       timeStyle: 'short',
                     })}
                   </Table.Cell>
-                  <Table.Cell>{mealTypeToDisplayText[meal.type]}</Table.Cell>
+                  <Table.Cell>{meal.type_name}</Table.Cell>
                   <Table.Cell>{meal.items.join(', ')}</Table.Cell>
                   <Table.Cell className="text-end last:pr-2.5">
-                    <MealActionsMenu meal={meal}>
+                    <MealActionsMenu meal_id={meal.id}>
                       <IconDotsVertical className="touch-target" />
                     </MealActionsMenu>
                   </Table.Cell>

@@ -1,7 +1,11 @@
 import { GridList, GridListEmptyState } from '@/components/ui/grid-list'
-import { mealCollection } from '@/db-collections'
+import {
+  mealCollection,
+  MealWithType,
+  mealWithTypeCollection,
+} from '@/db-collections'
 import { cn } from '@/lib/utils'
-import { Meal, mealTypeToDisplayText } from '@/schemas/meal'
+import { Meal } from '@/schemas/meal'
 import { like, useLiveQuery } from '@tanstack/react-db'
 import { createFileRoute, createLink, Outlet } from '@tanstack/react-router'
 import {
@@ -157,9 +161,8 @@ type DayType = {
 function Day({ day }: { day: DayType }) {
   const meals = useLiveQuery((q) =>
     q
-      .from({ meal: mealCollection })
-      .where(({ meal }) => like(meal.datetime, `${day.date.toString()}%`))
-      .orderBy(({ meal }) => meal.datetime, 'asc'),
+      .from({ meal: mealWithTypeCollection })
+      .where(({ meal }) => like(meal.datetime, `${day.date.toString()}%`)),
   )
 
   const { dragAndDropHooks } = useDragAndDrop<Meal>({
@@ -265,7 +268,10 @@ function handleDrop(
 
 const GridListItemLink = createLink(GridListItemPrimitive)
 
-function MealCard({ meal, ...props }: { meal: Meal } & GridListItemProps) {
+function MealCard({
+  meal,
+  ...props
+}: { meal: MealWithType } & GridListItemProps) {
   const date = Temporal.PlainDateTime.from(meal.datetime)
   return (
     <GridListItemLink
@@ -279,8 +285,8 @@ function MealCard({ meal, ...props }: { meal: Meal } & GridListItemProps) {
       to="/calendar/$mealId"
       params={{ mealId: meal.id }}
       search
-      aria-label={`Meal ${meal.type}`}
-      textValue={`Meal ${meal.type}`}
+      aria-label={`Meal ${meal.type_name}`}
+      textValue={`Meal ${meal.type_name}`}
       key={meal.id}
       {...props}
     >
@@ -291,7 +297,7 @@ function MealCard({ meal, ...props }: { meal: Meal } & GridListItemProps) {
       </ul>
 
       <div className="text-muted-fg text-sm flex gap-1">
-        <div>{mealTypeToDisplayText[meal.type]}</div> ·
+        <div>{meal.type_name}</div> ·
         <div>{date.toLocaleString('en-US', { timeStyle: 'short' })}</div>
         <ButtonPrimitive slot="drag" className="ml-auto">
           <DragIcon />

@@ -21,6 +21,11 @@ export const updateMealServer = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const session = await AuthContext.getSession()
 
+    const mealType = await getUserMealTypeById({
+      userId: session.user.id,
+      mealTypeId: data.meal_type_id,
+    })
+
     return await DB.createTx(async (tx) => {
       const { id, ...rest } = data
 
@@ -34,7 +39,14 @@ export const updateMealServer = createServerFn({ method: 'POST' })
       )
 
       await DB.use((db) =>
-        db.update(mealTable).set(rest).where(eq(mealTable.id, meal.id)),
+        db
+          .update(mealTable)
+          .set({
+            datetime: rest.datetime,
+            items: rest.items,
+            mealTypeId: mealType.id,
+          })
+          .where(eq(mealTable.id, meal.id)),
       )
 
       const txid = await generateTxId(tx)
@@ -46,10 +58,20 @@ export const createMealServer = createServerFn({ method: 'POST' })
   .inputValidator(mealSchema)
   .handler(async ({ data }) => {
     const session = await AuthContext.getSession()
+    const mealType = await getUserMealTypeById({
+      userId: session.user.id,
+      mealTypeId: data.meal_type_id,
+    })
 
     return await DB.createTx(async (tx) => {
       await DB.use((db) =>
-        db.insert(mealTable).values({ ...data, userId: session.user.id }),
+        db.insert(mealTable).values({
+          id: data.id,
+          mealTypeId: mealType.id,
+          items: data.items,
+          datetime: data.datetime,
+          userId: session.user.id,
+        }),
       )
 
       const txid = await generateTxId(tx)
@@ -102,31 +124,58 @@ export const transcribeServer = createServerFn({ method: 'POST' })
     const transcript = results.text
     console.log({ transcript })
 
-    const schema = createInsertSchema(mealTable).omit({
-      id: true,
-      userId: true,
-    })
+    const mealTypes = await listUserMealTypes({ userId: session.user.id })
+
+    const formattedMealTypes = mealTypes.map(
+      (mealType) => `- ${mealType.name}, default time: ${mealType.defaultTime}`,
+    )
+
+    const schema = createInsertSchema(mealTable)
+      .omit({
+        id: true,
+        userId: true,
+        mealTypeId: true,
+      })
+      .extend({
+        mealTypeName: z.enum(mealTypes.map((mealType) => mealType.name)),
+      })
+
+    const prompt = `Extract meal information from this voice transcript: "${transcript}"
+
+    Current date: ${data.today}
+
+    Instructions:
+    - Parse the meal name/description from what the user said
+    - If the user mentions a specific date or time (e.g., "yesterday", "this morning", "at 3pm"), calculate the appropriate datetime relative to ${data.today}
+    - Extract any mentioned nutritional information or details
+    - Be flexible with informal language (e.g., "I had pizza" → meal name: "pizza")
+
+    This is list of user meal types:
+    ${formattedMealTypes.join('\n')}`
+    console.log(prompt)
 
     const { object } = await generateObject({
       model: google('gemini-2.5-pro'),
       schema,
-      prompt: `Extract meal information from this voice transcript: "${transcript}"
-
-Current date: ${data.today}
-
-Instructions:
-- Parse the meal name/description from what the user said
-- If the user mentions a specific date or time (e.g., "yesterday", "this morning", "at 3pm"), calculate the appropriate datetime relative to ${data.today}
-- Extract any mentioned nutritional information or details
-- Be flexible with informal language (e.g., "I had pizza" → meal name: "pizza")`,
+      prompt,
     })
 
     console.log({ object })
 
+    const mealType = await getUserMealTypeByName({
+      mealTypeName: object.mealTypeName.trim(),
+      userId: session.user.id,
+    })
+
     const [insertedMeal] = await DB.use((db) =>
       db
         .insert(mealTable)
-        .values({ ...object, userId: session.user.id })
+        .values({
+          userId: session.user.id,
+          datetime: object.datetime,
+          items: object.items,
+          mealTypeId: mealType.id,
+        })
         .returning()
         .execute(),
     )

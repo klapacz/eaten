@@ -1,4 +1,8 @@
-import { createCollection } from '@tanstack/react-db'
+import {
+  createCollection,
+  eq,
+  liveQueryCollectionOptions,
+} from '@tanstack/react-db'
 import { electricCollectionOptions } from '@tanstack/electric-db-collection'
 import { mealSchema } from '@/schemas/meal'
 import {
@@ -6,6 +10,7 @@ import {
   createMealServer,
   removeMealServer,
 } from '@/data/meal'
+import { mealTypeSchema } from '@/schemas/meal_type'
 
 export const mealCollection = createCollection(
   electricCollectionOptions({
@@ -42,3 +47,44 @@ export const mealCollection = createCollection(
     },
   }),
 )
+
+export const mealTypeCollection = createCollection(
+  electricCollectionOptions({
+    id: 'meal_type_collection',
+    shapeOptions: {
+      url:
+        typeof window !== 'undefined'
+          ? new URL('/api/sync/meal_type', window.location.origin).toString()
+          : '',
+    },
+
+    schema: mealTypeSchema,
+    getKey: (item) => item.id,
+  }),
+)
+
+export const mealWithTypeCollection = createCollection(
+  liveQueryCollectionOptions({
+    id: 'meal_with_type_collection',
+    query: (q) =>
+      q
+        .from({ meal: mealCollection })
+        .innerJoin({ type: mealTypeCollection }, ({ meal, type }) =>
+          eq(meal.meal_type_id, type.id),
+        )
+        .orderBy(({ meal }) => meal.datetime, 'asc')
+        .select(({ meal, type }) => ({
+          id: meal.id,
+          items: meal.items,
+          datetime: meal.datetime,
+          type_name: type.name,
+        })),
+  }),
+)
+
+export type MealWithType = {
+  id: string
+  items: string[]
+  datetime: string
+  type_name: string
+}
