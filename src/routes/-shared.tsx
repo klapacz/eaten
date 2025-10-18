@@ -8,7 +8,6 @@ import {
   MenuContent,
   MenuItem,
   MenuSeparator,
-  MenuTrigger,
 } from '@/components/ui/menu'
 import {
   TanstackForm,
@@ -168,9 +167,7 @@ export function UpdateMealSheetContent({
             onDuplicate={close}
             onDelete={close}
           >
-            <Button intent="outline" className="w-full">
-              Actions
-            </Button>
+            <Button intent="outline">Actions</Button>
           </MealActionsMenu>
         </Sheet.Footer>
       </TanstackForm>
@@ -207,7 +204,7 @@ export function MealActionsMenu({
 
   return (
     <Menu>
-      <MenuTrigger>{children}</MenuTrigger>
+      {children}
       <MenuContent placement="bottom start" className="w-full">
         <MenuItem onAction={handleDuplicate}>
           <IconDuplicate /> Duplicate

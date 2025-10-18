@@ -3,17 +3,17 @@ import { mealTypeCollection } from '@/db-collections'
 import { IconTrash } from '@intentui/icons'
 import z from 'zod'
 import { Sheet } from '@/components/ui/sheet'
-import { Menu, MenuContent, MenuItem, MenuTrigger } from '@/components/ui/menu'
+import { Menu, MenuContent, MenuItem } from '@/components/ui/menu'
 import {
   TanstackForm,
   useAppForm,
   withFieldGroup,
 } from '@/integrations/tanstack-form'
 import { useMemo } from 'react'
-import { Separator } from '@/components/ui/separator'
 import { MealType, mealTypeSchema } from '@/schemas/meal_type'
 import { parseTime, Time } from '@internationalized/date'
 import { useStore } from '@tanstack/react-form'
+import { toast } from 'sonner'
 
 export function CreateMealTypeSheetContent({ close }: { close: () => void }) {
   const defaultValues: z.infer<typeof mealTypeFormSchema> = useMemo(
@@ -60,8 +60,6 @@ export function CreateMealTypeSheetContent({ close }: { close: () => void }) {
               consider_time: 'consider_time',
             }}
           />
-
-          <Separator />
         </Sheet.Body>
         <Sheet.Footer>
           <form.SubscribeButton>Create</form.SubscribeButton>
@@ -120,16 +118,12 @@ export function UpdateMealTypeSheetContent({
               consider_time: 'consider_time',
             }}
           />
-
-          <Separator />
         </Sheet.Body>
         <Sheet.Footer>
           <form.SubscribeButton />
 
           <MealTypeActionsMenu meal_type_id={mealType.id} onDelete={close}>
-            <Button intent="outline" className="w-full">
-              Actions
-            </Button>
+            <Button intent="outline">Actions</Button>
           </MealTypeActionsMenu>
         </Sheet.Footer>
       </TanstackForm>
@@ -146,13 +140,20 @@ export function MealTypeActionsMenu({
   onDelete?: () => void
 }>) {
   const handleDelete = async () => {
-    mealTypeCollection.delete(meal_type_id)
-    onDelete?.()
+    try {
+      const tx = mealTypeCollection.delete(meal_type_id)
+      await tx.isPersisted.promise
+      onDelete?.()
+    } catch (error) {
+      toast.error('Failed to delete meal type', {
+        description: error instanceof Error ? error.message : 'Unknown error',
+      })
+    }
   }
 
   return (
     <Menu>
-      <MenuTrigger>{children}</MenuTrigger>
+      {children}
       <MenuContent placement="bottom start" className="w-full">
         <MenuItem isDanger onAction={handleDelete}>
           <IconTrash /> Delete

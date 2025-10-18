@@ -10,6 +10,7 @@ import { buttonStyles } from '@/components/ui/button'
 import { useIsMobile } from '@/hooks/use-is-mobile'
 import { MealTypeActionsMenu } from './-meal-type-shared'
 import { Temporal } from 'temporal-polyfill'
+import { MenuTrigger } from '@/components/ui/menu'
 
 export const Route = createFileRoute('/_app/meal-type')({
   component: App,
@@ -61,7 +62,9 @@ function App() {
                   </Table.Cell>
                   <Table.Cell className="text-end last:pr-2.5">
                     <MealTypeActionsMenu meal_type_id={mealType.id}>
-                      <IconDotsVertical className="touch-target" />
+                      <MenuTrigger>
+                        <IconDotsVertical className="touch-target" />
+                      </MenuTrigger>
                     </MealTypeActionsMenu>
                   </Table.Cell>
                 </TableRowLink>

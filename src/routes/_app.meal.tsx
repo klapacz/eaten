@@ -7,6 +7,7 @@ import { IconDotsVertical } from '@intentui/icons'
 import { Breadcrumbs } from '@/components/ui/breadcrumbs'
 import { CreateMealButtonGroup, MealActionsMenu } from './-shared'
 import AppSidebarNav from './-app-sidebar-nav'
+import { MenuTrigger } from 'react-aria-components'
 
 export const Route = createFileRoute('/_app/meal')({
   component: App,
@@ -49,7 +50,9 @@ function App() {
                   <Table.Cell>{meal.items.join(', ')}</Table.Cell>
                   <Table.Cell className="text-end last:pr-2.5">
                     <MealActionsMenu meal_id={meal.id}>
-                      <IconDotsVertical className="touch-target" />
+                      <MenuTrigger>
+                        <IconDotsVertical className="touch-target" />
+                      </MenuTrigger>
                     </MealActionsMenu>
                   </Table.Cell>
                 </TableRowLink>
