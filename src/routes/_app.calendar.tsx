@@ -207,14 +207,14 @@ function Day({ day }: { day: DayType }) {
           !day.isToday && 'text-muted-fg',
         )}
       >
-        {day.date.toLocaleString('en-US', {
+        {day.date.toLocaleString(undefined, {
           weekday: 'short',
           day: 'numeric',
         })}
       </div>
 
       <GridList
-        aria-label={`Meal List ${day.date.toLocaleString('en-US', { weekday: 'long' })}`}
+        aria-label={`Meal List ${day.date.toLocaleString(undefined, { weekday: 'long' })}`}
         className="flex flex-1 flex-col gap-2 p-2 group-first:pl-0 group-last:pr-0 group-not-last:border-r border-border/50"
         items={meals.data}
         dragAndDropHooks={dragAndDropHooks}
@@ -303,7 +303,7 @@ function MealCard({
         {meal.type_consider_time ? (
           <>
             {' · '}
-            <div>{date.toLocaleString('en-US', { timeStyle: 'short' })}</div>
+            <div>{date.toLocaleString(undefined, { timeStyle: 'short' })}</div>
           </>
         ) : null}
         <ButtonPrimitive slot="drag" className="ml-auto">
