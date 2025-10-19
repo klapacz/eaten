@@ -35,7 +35,7 @@ function App() {
           <Table.Header>
             <Table.Column isRowHeader>Name</Table.Column>
             <Table.Column>Consider Time</Table.Column>
-            <Table.Column className="items-end">
+            <Table.Column>
               <span className="ml-auto">Default Time</span>
             </Table.Column>
             <Table.Column />

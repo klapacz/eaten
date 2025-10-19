@@ -98,7 +98,6 @@ export const mealWithTypeCollection = createCollection(
         .innerJoin({ type: mealTypeCollection }, ({ meal, type }) =>
           eq(meal.meal_type_id, type.id),
         )
-        .orderBy(({ meal }) => meal.datetime, 'asc')
         .select(({ meal, type }) => ({
           id: meal.id,
           items: meal.items,

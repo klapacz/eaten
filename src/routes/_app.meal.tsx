@@ -14,7 +14,11 @@ export const Route = createFileRoute('/_app/meal')({
 })
 
 function App() {
-  const meals = useLiveQuery((q) => q.from({ meal: mealWithTypeCollection }))
+  const meals = useLiveQuery((q) =>
+    q
+      .from({ meal: mealWithTypeCollection })
+      .orderBy(({ meal }) => meal.datetime, 'asc'),
+  )
 
   return (
     <div className="[--gutter:--spacing(4)]">
@@ -26,7 +30,9 @@ function App() {
         <Table aria-label="Meals" bleed>
           <Table.Header>
             <Table.Column isRowHeader>Date</Table.Column>
-            <Table.Column>Time</Table.Column>
+            <Table.Column>
+              <span className="ml-auto">Time</span>
+            </Table.Column>
             <Table.Column>Type</Table.Column>
             <Table.Column>Items</Table.Column>
             <Table.Column />
@@ -41,10 +47,12 @@ function App() {
                       dateStyle: 'short',
                     })}
                   </Table.Cell>
-                  <Table.Cell>
-                    {dt.toLocaleString(undefined, {
-                      timeStyle: 'short',
-                    })}
+                  <Table.Cell className="text-right">
+                    {meal.type_consider_time
+                      ? dt.toLocaleString(undefined, {
+                          timeStyle: 'short',
+                        })
+                      : '-'}
                   </Table.Cell>
                   <Table.Cell>{meal.type_name}</Table.Cell>
                   <Table.Cell>{meal.items.join(', ')}</Table.Cell>
