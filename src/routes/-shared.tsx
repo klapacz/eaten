@@ -24,7 +24,7 @@ import {
   today,
   toTime,
 } from '@internationalized/date'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { Select } from '@/components/ui/select'
 import { fieldStyles } from '@/components/ui/field'
 import { Separator } from '@/components/ui/separator'
@@ -54,6 +54,7 @@ export const validateSearch = z.union([
 ])
 
 export function CreateMealSheetContent({ close }: { close: () => void }) {
+  const bodyRef = useRef<HTMLDivElement>(null)
   const defaultValues: z.infer<typeof mealFormSchema> = useMemo(
     () => ({
       id: crypto.randomUUID(),
@@ -81,13 +82,30 @@ export function CreateMealSheetContent({ close }: { close: () => void }) {
     },
   })
 
+  useEffect(() => {
+    const body = bodyRef.current
+    if (!body) return
+
+    const handleFocus = (e: FocusEvent) => {
+      const target = e.target as HTMLElement
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+        setTimeout(() => {
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }, 300)
+      }
+    }
+
+    body.addEventListener('focusin', handleFocus)
+    return () => body.removeEventListener('focusin', handleFocus)
+  }, [])
+
   return (
     <>
       <Sheet.Header>
         <Sheet.Title>Create Meal</Sheet.Title>
       </Sheet.Header>
       <TanstackForm form={form} AppForm={form.AppForm}>
-        <Sheet.Body className="grid gap-4">
+        <Sheet.Body ref={bodyRef} className="grid gap-4">
           <form.ServerErrorNote />
 
           <FieldGroupMeal
@@ -117,6 +135,7 @@ export function UpdateMealSheetContent({
   meal: Meal
   close: () => void
 }) {
+  const bodyRef = useRef<HTMLDivElement>(null)
   const defaultValues: z.infer<typeof mealFormSchema> = useMemo(
     () => ({
       ...meal,
@@ -142,13 +161,30 @@ export function UpdateMealSheetContent({
     },
   })
 
+  useEffect(() => {
+    const body = bodyRef.current
+    if (!body) return
+
+    const handleFocus = (e: FocusEvent) => {
+      const target = e.target as HTMLElement
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+        setTimeout(() => {
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }, 300)
+      }
+    }
+
+    body.addEventListener('focusin', handleFocus)
+    return () => body.removeEventListener('focusin', handleFocus)
+  }, [])
+
   return (
     <>
       <Sheet.Header>
         <Sheet.Title>Meal</Sheet.Title>
       </Sheet.Header>
       <TanstackForm form={form} AppForm={form.AppForm}>
-        <Sheet.Body className="grid gap-4">
+        <Sheet.Body ref={bodyRef} className="grid gap-4">
           <form.ServerErrorNote />
 
           <FieldGroupMeal
@@ -371,8 +407,9 @@ const FieldGroupMeal = withFieldGroup({
                     <group.AppField key={i} name={`items[${i}]`}>
                       {(subField) => {
                         return (
-                          <div>
+                          <div className="scroll-mt-[200px]">
                             <subField.TextField
+                              className="scroll-mt-[200px]"
                               suffix={
                                 <Button
                                   size="sq-xs"
