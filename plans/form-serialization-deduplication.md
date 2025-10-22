@@ -93,21 +93,21 @@ export type EncoderMap<TSchema> = {
 
 export interface SchemaEncoder<TDbSchema, TFormSchema> {
   /**
-   * Transform database object to form object
+   * Decode database object to form object
    */
-  toForm(dbValue: TDbSchema): TFormSchema
+  decode(dbValue: TDbSchema): TFormSchema
 
   /**
-   * Transform form object to database object
+   * Encode form object to database object
    */
-  toDb(formValue: TFormSchema): TDbSchema
+  encode(formValue: TFormSchema): TDbSchema
 }
 
 export function createSchemaEncoder<TDbSchema, TFormSchema>(
   encoderMap: EncoderMap<TDbSchema>
 ): SchemaEncoder<TDbSchema, TFormSchema> {
   return {
-    toForm(dbValue) {
+    decode(dbValue) {
       const result = { ...dbValue } as any
 
       for (const [field, encoder] of Object.entries(encoderMap)) {
@@ -119,7 +119,7 @@ export function createSchemaEncoder<TDbSchema, TFormSchema>(
       return result
     },
 
-    toDb(formValue) {
+    encode(formValue) {
       const result = { ...formValue } as any
 
       for (const [field, encoder] of Object.entries(encoderMap)) {
@@ -209,12 +209,12 @@ const tx = mealCollection.update(meal.id, (draft) => {
 import { mealEncoder } from '@/lib/meal-encoders'
 
 const defaultValues: z.infer<typeof mealFormSchema> = useMemo(
-  () => mealEncoder.toForm(meal),
+  () => mealEncoder.decode(meal),
   [meal],
 )
 
 // In onSubmit:
-const dbValue = mealEncoder.toDb(value)
+const dbValue = mealEncoder.encode(value)
 const tx = mealCollection.update(meal.id, (draft) => {
   Object.assign(draft, dbValue)
 })
@@ -248,12 +248,12 @@ const tx = mealTypeCollection.update(mealType.id, (draft) => {
 import { mealTypeEncoder } from '@/lib/meal-type-encoders'
 
 const defaultValues: z.infer<typeof mealTypeFormSchema> = useMemo(
-  () => mealTypeEncoder.toForm(mealType),
+  () => mealTypeEncoder.decode(mealType),
   [mealType],
 )
 
 // In onSubmit:
-const dbValue = mealTypeEncoder.toDb(value)
+const dbValue = mealTypeEncoder.encode(value)
 const tx = mealTypeCollection.update(mealType.id, (draft) => {
   Object.assign(draft, dbValue)
 })
@@ -300,9 +300,9 @@ export const newFormEncoder = createSchemaEncoder<DbType, FormType>({
 })
 
 // 2. Use in form
-const defaultValues = useMemo(() => newFormEncoder.toForm(dbData), [dbData])
+const defaultValues = useMemo(() => newFormEncoder.decode(dbData), [dbData])
 const onSubmit = async ({ value }) => {
-  const dbValue = newFormEncoder.toDb(value)
+  const dbValue = newFormEncoder.encode(value)
   await collection.insert(dbValue)
 }
 ```
