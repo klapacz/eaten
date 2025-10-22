@@ -30,6 +30,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import { useIsMobile } from '@/hooks/use-is-mobile'
 import { CreateMealButtonGroup } from './-shared'
 import AppSidebarNav from './-app-sidebar-nav'
+import { MealTypeBadge } from '@/components/meal-type-badge'
 
 const today = Temporal.Now.plainDateISO()
 const todayISO = today.toString()
@@ -308,11 +309,13 @@ function MealCard({
         ))}
       </ul>
 
-      <div className="text-muted-fg text-sm flex gap-1">
-        <div>{meal.type_name}</div>
+      <div className="text-muted-fg text-sm flex gap-2 items-center">
+        <MealTypeBadge meal_type_color={meal.type_color}>
+          {meal.type_name}
+        </MealTypeBadge>
+
         {meal.type_consider_time ? (
           <>
-            {' · '}
             <div>{date.toLocaleString(undefined, { timeStyle: 'short' })}</div>
           </>
         ) : null}

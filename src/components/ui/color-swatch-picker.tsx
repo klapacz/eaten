@@ -1,7 +1,4 @@
-import type {
-  ColorSwatchPickerItemProps,
-  ColorSwatchPickerProps,
-} from 'react-aria-components'
+import type { ColorSwatchPickerProps } from 'react-aria-components'
 import {
   ColorSwatchPickerItem as ColorSwatchPickerItemPrimitive,
   ColorSwatchPicker as ColorSwatchPickerPrimitive,
@@ -31,7 +28,7 @@ const ColorSwatchPickerItem = ({
   className,
   children,
   ...props
-}: ColorSwatchPickerItemProps) => {
+}: React.ComponentProps<typeof ColorSwatchPickerItemPrimitive>) => {
   return (
     <ColorSwatchPickerItemPrimitive
       className={composeTailwindRenderProps(

@@ -34,6 +34,7 @@ export const updateMealTypeServer = createServerFn({ method: 'POST' })
             defaultTime: rest.default_time,
             name: rest.name,
             considerTime: rest.consider_time,
+            color: rest.color,
           })
           .where(eq(mealTypeTable.id, mealType.id)),
       )

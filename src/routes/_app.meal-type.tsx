@@ -11,6 +11,7 @@ import { useIsMobile } from '@/hooks/use-is-mobile'
 import { MealTypeActionsMenu } from './-meal-type-shared'
 import { Temporal } from 'temporal-polyfill'
 import { MenuTrigger } from '@/components/ui/menu'
+import { MealTypeBadge } from '@/components/meal-type-badge'
 
 export const Route = createFileRoute('/_app/meal-type')({
   component: App,
@@ -48,7 +49,11 @@ function App() {
                   to="/meal-type/$mealTypeId"
                   params={{ mealTypeId: mealType.id }}
                 >
-                  <Table.Cell>{mealType.name}</Table.Cell>
+                  <Table.Cell>
+                    <MealTypeBadge meal_type_color={mealType.color}>
+                      {mealType.name}
+                    </MealTypeBadge>
+                  </Table.Cell>
                   <Table.Cell>
                     {mealType.consider_time ? 'Yes' : 'No'}
                   </Table.Cell>

@@ -11,7 +11,10 @@ export const Route = createFileRoute('/api/sync/meal_type')({
 
           searchParams.set('table', 'meal_type')
           searchParams.set('where', `user_id = '${session.user.id}'`)
-          searchParams.set('columns', 'id,default_time,name,consider_time')
+          searchParams.set(
+            'columns',
+            'id,default_time,name,consider_time,color',
+          )
         })
       },
     },

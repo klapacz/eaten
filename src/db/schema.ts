@@ -9,6 +9,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core'
 import { auth_user } from './auth.schema'
+import { MealTypeColorUtils } from '@/utils/meal-type-color.utils'
 
 export const mealTypeTable = pgTable(
   'meal_type',
@@ -20,7 +21,10 @@ export const mealTypeTable = pgTable(
     userId: text()
       .notNull()
       .references(() => auth_user.id),
-    color: text().notNull().default('gray'),
+    color: text()
+      .notNull()
+      .$type<MealTypeColorUtils.ColorName>()
+      .default('gray'),
   },
   (t) => [unique().on(t.userId, t.name)],
 )

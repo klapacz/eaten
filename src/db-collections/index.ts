@@ -16,6 +16,7 @@ import {
   createMealTypeServer,
   removeMealTypeServer,
 } from '@/data/meal_type'
+import { MealTypeColorUtils } from '@/utils/meal-type-color.utils'
 
 export const mealCollection = createCollection(
   electricCollectionOptions({
@@ -104,6 +105,7 @@ export const mealWithTypeCollection = createCollection(
           datetime: meal.datetime,
           type_name: type.name,
           type_consider_time: type.consider_time,
+          type_color: type.color,
         })),
   }),
 )
@@ -114,4 +116,5 @@ export type MealWithType = {
   datetime: string
   type_name: string
   type_consider_time: boolean
+  type_color: MealTypeColorUtils.ColorName
 }

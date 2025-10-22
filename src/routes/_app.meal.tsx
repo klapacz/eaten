@@ -8,6 +8,7 @@ import { Breadcrumbs } from '@/components/ui/breadcrumbs'
 import { CreateMealButtonGroup, MealActionsMenu } from './-shared'
 import AppSidebarNav from './-app-sidebar-nav'
 import { MenuTrigger } from 'react-aria-components'
+import { MealTypeBadge } from '@/components/meal-type-badge'
 
 export const Route = createFileRoute('/_app/meal')({
   component: App,
@@ -54,7 +55,11 @@ function App() {
                         })
                       : '-'}
                   </Table.Cell>
-                  <Table.Cell>{meal.type_name}</Table.Cell>
+                  <Table.Cell>
+                    <MealTypeBadge meal_type_color={meal.type_color}>
+                      {meal.type_name}
+                    </MealTypeBadge>
+                  </Table.Cell>
                   <Table.Cell>{meal.items.join(', ')}</Table.Cell>
                   <Table.Cell className="text-end last:pr-2.5">
                     <MealActionsMenu meal_id={meal.id}>
