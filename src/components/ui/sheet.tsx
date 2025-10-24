@@ -57,8 +57,10 @@ const sheetContentStyles = tv({
       bottom:
         'entering:slide-in-from-bottom exiting:slide-out-to-bottom inset-x-0 bottom-0 rounded-t-2xl border-t',
       left: 'entering:slide-in-from-left exiting:slide-out-to-left-80 inset-y-0 left-0 h-auto w-3/4 overflow-y-auto border-r sm:max-w-80',
-      right:
+      right: [
         'entering:slide-in-from-right exiting:slide-out-to-right-80 inset-y-0 right-0 h-auto w-3/4 overflow-y-auto border-l sm:max-w-80',
+        '[view-transition-name:app-sheet-right-transition]',
+      ],
     },
     isFloat: {
       false: 'border-fg/20 dark:border-border',
