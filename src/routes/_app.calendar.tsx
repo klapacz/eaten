@@ -26,7 +26,7 @@ import { DragIcon } from '@/components/ui/drag-icon'
 import z from 'zod'
 import { VisuallyHidden } from '@/components/ui/visually-hidden'
 import { Breadcrumbs } from '@/components/ui/breadcrumbs'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useIsMobile } from '@/hooks/use-is-mobile'
 import { CreateMealButtonGroup } from './-shared'
 import AppSidebarNav from './-app-sidebar-nav'
@@ -199,8 +199,18 @@ function Day({ day }: { day: DayType }) {
     },
   })
 
+  const dayRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!day.isToday || !dayRef.current) return
+
+    dayRef.current.scrollIntoView({
+      inline: 'start',
+    })
+  }, [])
+
   return (
-    <div className="flex flex-col group">
+    <div className="flex flex-col group" ref={dayRef}>
       <div
         className={cn(
           'p-2 text-center group-first:pl-0 group-last:pr-0 border-b border-border/50',
