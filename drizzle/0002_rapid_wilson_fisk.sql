@@ -1,0 +1,1 @@
+ALTER TABLE "meal_type" ADD COLUMN "color" text DEFAULT 'gray' NOT NULL;

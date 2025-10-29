@@ -20,6 +20,7 @@ export const mealTypeTable = pgTable(
     userId: text()
       .notNull()
       .references(() => auth_user.id),
+    color: text().notNull().default('gray'),
   },
   (t) => [unique().on(t.userId, t.name)],
 )

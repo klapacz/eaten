@@ -15,6 +15,13 @@
       "when": 1760771549831,
       "tag": "0001_nice_trauma",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1761762055682,
+      "tag": "0002_rapid_wilson_fisk",
+      "breakpoints": true
     }
   ]
 }
