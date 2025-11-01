@@ -9,7 +9,7 @@ import {
   useAppForm,
   withFieldGroup,
 } from '@/integrations/tanstack-form'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { MealType, mealTypeSchema } from '@/schemas/meal_type'
 import { parseTime, Time } from '@internationalized/date'
 import { useStore } from '@tanstack/react-form'
@@ -18,6 +18,7 @@ import { ColorSwatchPicker } from '@/components/ui/color-swatch-picker'
 import { parseColor } from 'react-stately'
 import { fieldStyles } from '@/components/ui/field'
 import { MealTypeColorUtils } from '@/utils/meal-type-color.utils'
+import { Modal } from '@/components/ui/modal'
 
 export function CreateMealTypeSheetContent({ close }: { close: () => void }) {
   const defaultValues: z.infer<typeof mealTypeFormSchema> = useMemo(
@@ -147,6 +148,7 @@ export function MealTypeActionsMenu({
   meal_type_id: string
   onDelete?: () => void
 }>) {
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const handleDelete = async () => {
     try {
       const tx = mealTypeCollection.delete(meal_type_id)
@@ -160,14 +162,31 @@ export function MealTypeActionsMenu({
   }
 
   return (
-    <Menu>
-      {children}
-      <MenuContent placement="bottom start" className="w-full">
-        <MenuItem isDanger onAction={handleDelete}>
-          <IconTrash /> Delete
-        </MenuItem>
-      </MenuContent>
-    </Menu>
+    <>
+      <Menu>
+        {children}
+        <MenuContent placement="bottom start" className="w-full">
+          <MenuItem isDanger onAction={() => setIsDeleteDialogOpen(true)}>
+            <IconTrash /> Delete
+          </MenuItem>
+        </MenuContent>
+      </Menu>
+
+      <Modal isOpen={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <Modal.Content>
+          <Modal.Header>Delete Meal Type</Modal.Header>
+          <Modal.Body>
+            Are you sure you want to delete this meal type?
+          </Modal.Body>
+          <Modal.Footer>
+            <Modal.Close>Cancel</Modal.Close>
+            <Button intent="danger" onClick={handleDelete}>
+              Delete
+            </Button>
+          </Modal.Footer>
+        </Modal.Content>
+      </Modal>
+    </>
   )
 }
 

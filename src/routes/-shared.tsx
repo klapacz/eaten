@@ -24,7 +24,7 @@ import {
   today,
   toTime,
 } from '@internationalized/date'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Select } from '@/components/ui/select'
 import { fieldStyles } from '@/components/ui/field'
 import { Separator } from '@/components/ui/separator'
@@ -41,6 +41,7 @@ import {
 import { VoiceRecorder } from './-voice-recorder'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useStore } from '@tanstack/react-form'
+import { Modal } from '@/components/ui/modal'
 
 export const validateSearch = z.union([
   z.object({
@@ -189,6 +190,7 @@ export function MealActionsMenu({
   onDuplicate?: () => void
   onDelete?: () => void
 }>) {
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const handleDelete = async () => {
     mealCollection.delete(meal_id)
     close()
@@ -207,18 +209,33 @@ export function MealActionsMenu({
   }
 
   return (
-    <Menu>
-      {children}
-      <MenuContent placement="bottom start" className="w-full">
-        <MenuItem onAction={handleDuplicate}>
-          <IconDuplicate /> Duplicate
-        </MenuItem>
-        <MenuSeparator />
-        <MenuItem isDanger onAction={handleDelete}>
-          <IconTrash /> Delete
-        </MenuItem>
-      </MenuContent>
-    </Menu>
+    <>
+      <Menu>
+        {children}
+        <MenuContent placement="bottom start" className="w-full">
+          <MenuItem onAction={handleDuplicate}>
+            <IconDuplicate /> Duplicate
+          </MenuItem>
+          <MenuSeparator />
+          <MenuItem isDanger onAction={() => setIsDeleteDialogOpen(true)}>
+            <IconTrash /> Delete
+          </MenuItem>
+        </MenuContent>
+      </Menu>
+
+      <Modal isOpen={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <Modal.Content>
+          <Modal.Header>Delete Meal</Modal.Header>
+          <Modal.Body>Are you sure you want to delete this meal?</Modal.Body>
+          <Modal.Footer>
+            <Modal.Close>Cancel</Modal.Close>
+            <Button intent="danger" onClick={handleDelete}>
+              Delete
+            </Button>
+          </Modal.Footer>
+        </Modal.Content>
+      </Modal>
+    </>
   )
 }
 
