@@ -8,6 +8,7 @@ import { z } from 'zod'
 import { TanstackForm, useAppForm } from '@/integrations/tanstack-form'
 import { REGEXP_ONLY_DIGITS } from 'input-otp'
 import { useMutation } from '@tanstack/react-query'
+import { Avatar } from '@/components/ui/avatar'
 
 export const Route = createFileRoute('/auth/login')({
   component: RouteComponent,
@@ -42,6 +43,14 @@ function RouteComponent() {
               ? 'Enter your email to sign in'
               : `We've sent a code to ${userEmail}`}
           </Card.Description>
+          <Card.Action>
+            <Avatar
+              isSquare
+              size="xl"
+              className="outline-hidden"
+              src="/logo-sm.svg"
+            />
+          </Card.Action>
         </Card.Header>
         <Card.Content>
           {userEmail ? (

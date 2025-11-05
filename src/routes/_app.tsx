@@ -79,6 +79,13 @@ export default function AppSidebar(
     <Sidebar {...props}>
       <SidebarHeader>
         <Link to="/calendar" className="flex items-center gap-x-2">
+          <Avatar
+            isSquare
+            size="md"
+            className="outline-hidden"
+            src="/logo-sm.svg"
+          />
+
           <SidebarLabel className="font-medium">Eaten</SidebarLabel>
         </Link>
       </SidebarHeader>

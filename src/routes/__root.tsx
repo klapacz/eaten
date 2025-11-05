@@ -31,11 +31,65 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       {
         title: 'Eaten',
       },
+      // iOS-specific meta tags for proper home screen app behavior
+      {
+        name: 'apple-mobile-web-app-capable',
+        content: 'yes', // Enables standalone mode when added to home screen
+      },
+      {
+        name: 'apple-mobile-web-app-status-bar-style',
+        content: 'default', // Controls iOS status bar appearance (default, black, black-translucent)
+      },
+      {
+        name: 'apple-mobile-web-app-title',
+        content: 'Eaten', // Custom name shown on iOS home screen (defaults to <title> if omitted)
+      },
     ],
     links: [
       {
         rel: 'stylesheet',
         href: appCss,
+      },
+      {
+        rel: 'manifest',
+        href: '/manifest.json',
+      },
+      {
+        rel: 'icon',
+        href: '/favicon.ico',
+      },
+      // Apple Touch Icons for iOS home screen bookmarks
+      // iOS requires explicit apple-touch-icon links; it doesn't reliably use manifest.json icons
+      // Without these, iOS may fallback to using favicon.ico (low resolution) instead
+      {
+        rel: 'apple-touch-icon',
+        href: '/logo192.png',
+        sizes: '192x192',
+      },
+      {
+        rel: 'apple-touch-icon',
+        href: '/logo512.png',
+        sizes: '512x512',
+      },
+      {
+        rel: 'apple-touch-icon',
+        href: '/apple-touch-icon-120x120.png',
+        sizes: '120x120', // iPhone retina (@2x)
+      },
+      {
+        rel: 'apple-touch-icon',
+        href: '/apple-touch-icon-152x152.png',
+        sizes: '152x152', // iPad retina (@2x)
+      },
+      {
+        rel: 'apple-touch-icon',
+        href: '/apple-touch-icon-167x167.png',
+        sizes: '167x167', // iPad Pro (@2x)
+      },
+      {
+        rel: 'apple-touch-icon',
+        href: '/apple-touch-icon-180x180.png',
+        sizes: '180x180', // iPhone Plus, iPhone X and newer (@3x)
       },
     ],
   }),

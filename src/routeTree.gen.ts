@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LogoRouteImport } from './routes/logo'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
@@ -25,6 +26,11 @@ import { Route as AppMealTypeMealTypeIdRouteImport } from './routes/_app.meal-ty
 import { Route as AppCalendarAddRouteImport } from './routes/_app.calendar.add'
 import { Route as AppCalendarMealIdRouteImport } from './routes/_app.calendar.$mealId'
 
+const LogoRoute = LogoRouteImport.update({
+  id: '/logo',
+  path: '/logo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppRoute = AppRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
@@ -102,6 +108,7 @@ const AppCalendarMealIdRoute = AppCalendarMealIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/logo': typeof LogoRoute
   '/calendar': typeof AppCalendarRouteWithChildren
   '/meal': typeof AppMealRouteWithChildren
   '/meal-type': typeof AppMealTypeRouteWithChildren
@@ -118,6 +125,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/logo': typeof LogoRoute
   '/calendar': typeof AppCalendarRouteWithChildren
   '/meal': typeof AppMealRouteWithChildren
   '/meal-type': typeof AppMealTypeRouteWithChildren
@@ -136,6 +144,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
+  '/logo': typeof LogoRoute
   '/_app/calendar': typeof AppCalendarRouteWithChildren
   '/_app/meal': typeof AppMealRouteWithChildren
   '/_app/meal-type': typeof AppMealTypeRouteWithChildren
@@ -154,6 +163,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/logo'
     | '/calendar'
     | '/meal'
     | '/meal-type'
@@ -170,6 +180,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/logo'
     | '/calendar'
     | '/meal'
     | '/meal-type'
@@ -187,6 +198,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_app'
+    | '/logo'
     | '/_app/calendar'
     | '/_app/meal'
     | '/_app/meal-type'
@@ -205,6 +217,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  LogoRoute: typeof LogoRoute
   AuthLoginRoute: typeof AuthLoginRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiSyncMealRoute: typeof ApiSyncMealRoute
@@ -213,6 +226,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/logo': {
+      id: '/logo'
+      path: '/logo'
+      fullPath: '/logo'
+      preLoaderRoute: typeof LogoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app': {
       id: '/_app'
       path: ''
@@ -379,6 +399,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  LogoRoute: LogoRoute,
   AuthLoginRoute: AuthLoginRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiSyncMealRoute: ApiSyncMealRoute,
