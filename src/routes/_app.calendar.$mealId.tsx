@@ -2,7 +2,7 @@ import { Sheet } from '@/components/ui/sheet'
 import { mealCollection } from '@/db-collections'
 import { eq, useLiveQuery } from '@tanstack/react-db'
 import { createFileRoute } from '@tanstack/react-router'
-import { UpdateMealSheetContent } from './-shared'
+import { UpdateMealSheetContent } from '@/components/meal/update-meal-sheet-content'
 
 export const Route = createFileRoute('/_app/calendar/$mealId')({
   component: RouteComponent,

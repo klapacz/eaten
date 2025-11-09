@@ -1,6 +1,6 @@
 import { Sheet } from '@/components/ui/sheet'
 import { createFileRoute } from '@tanstack/react-router'
-import { CreateMealSheetContent } from './-shared'
+import { CreateMealSheetContent } from '@/components/meal/create-meal-sheet-content'
 
 export const Route = createFileRoute('/_app/calendar/add')({
   component: RouteComponent,

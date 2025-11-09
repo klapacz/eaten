@@ -28,7 +28,7 @@ import { VisuallyHidden } from '@/components/ui/visually-hidden'
 import { Breadcrumbs } from '@/components/ui/breadcrumbs'
 import { useEffect, useMemo, useRef } from 'react'
 import { useIsMobile } from '@/hooks/use-is-mobile'
-import { CreateMealButtonGroup } from './-shared'
+import { CreateMealButtonGroup } from '@/components/meal/create-meal-button-group'
 import AppSidebarNav from './-app-sidebar-nav'
 import { MealTypeBadge } from '@/components/meal-type-badge'
 
