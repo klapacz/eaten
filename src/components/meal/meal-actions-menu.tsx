@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import { mealCollection } from '@/db-collections'
+import { MealRepo } from '@/db-collections/meal'
 import { IconDuplicate, IconTrash } from '@intentui/icons'
 import {
   Menu,
@@ -22,19 +22,13 @@ export function MealActionsMenu({
 }>) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const handleDelete = async () => {
-    mealCollection.delete(meal_id)
+    MealRepo.remove(meal_id)
     close()
     onDelete?.()
   }
 
   const handleDuplicate = async () => {
-    const meal = mealCollection.get(meal_id)
-    if (!meal) return console.error('Meal not found')
-
-    mealCollection.insert({
-      ...meal,
-      id: crypto.randomUUID(),
-    })
+    MealRepo.duplicate(meal_id)
     onDuplicate?.()
   }
 

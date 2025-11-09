@@ -15,8 +15,25 @@ import {
 import { useMemo } from 'react'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useStore } from '@tanstack/react-form'
+import { Encoder } from '@/lib/encoder'
+import { MealRepo } from '@/db-collections/meal'
+import { calendarDateTimeEncoder } from '@/lib/internationalized'
 
 const { label } = fieldStyles()
+
+export const mealFormEncoder: Encoder<
+  MealRepo.Record,
+  z.infer<typeof mealFormSchema>
+> = {
+  decode: (value) => ({
+    ...value,
+    datetime: calendarDateTimeEncoder.decode(value.datetime),
+  }),
+  encode: (value) => ({
+    ...value,
+    datetime: calendarDateTimeEncoder.encode(value.datetime),
+  }),
+}
 
 export const mealFormSchema = mealSchema.extend({
   datetime: z.instanceof(CalendarDateTime),

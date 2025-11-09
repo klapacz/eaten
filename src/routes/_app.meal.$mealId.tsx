@@ -3,6 +3,7 @@ import { mealCollection } from '@/db-collections'
 import { eq, useLiveQuery } from '@tanstack/react-db'
 import { createFileRoute } from '@tanstack/react-router'
 import { UpdateMealSheetContent } from '@/components/meal/update-meal-sheet-content'
+import { MealRepo } from '@/db-collections/meal'
 
 export const Route = createFileRoute('/_app/meal/$mealId')({
   component: RouteComponent,
@@ -30,7 +31,12 @@ function RouteComponent() {
       onOpenChange={() => navigate({ to: '/meal', viewTransition: true })}
     >
       <Sheet.Content>
-        {({ close }) => <UpdateMealSheetContent meal={meal} close={close} />}
+        {({ close }) => (
+          <UpdateMealSheetContent
+            meal={MealRepo.encoder.decode(meal)}
+            close={close}
+          />
+        )}
       </Sheet.Content>
     </Sheet>
   )

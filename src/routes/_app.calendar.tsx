@@ -1,11 +1,7 @@
 import { GridList, GridListEmptyState } from '@/components/ui/grid-list'
-import {
-  mealCollection,
-  MealWithType,
-  mealWithTypeCollection,
-} from '@/db-collections'
+import { MealWithType, mealWithTypeCollection } from '@/db-collections'
+import { MealRepo } from '@/db-collections/meal'
 import { cn } from '@/lib/utils'
-import { Meal } from '@/schemas/meal'
 import { like, useLiveQuery } from '@tanstack/react-db'
 import { createFileRoute, createLink, Outlet } from '@tanstack/react-router'
 import {
@@ -168,7 +164,7 @@ function Day({ day }: { day: DayType }) {
       .where(({ meal }) => like(meal.datetime, `${day.date.toString()}%`)),
   )
 
-  const { dragAndDropHooks } = useDragAndDrop<Meal>({
+  const { dragAndDropHooks } = useDragAndDrop<MealRepo.StoredRecord>({
     // Accept drops with the custom format.
     acceptedDragTypes: ['custom-app-type'],
 
@@ -247,35 +243,12 @@ function handleDrop(
   targetDate: Temporal.PlainDate,
 ) {
   if (dropOperation === 'move') {
-    mealCollection.update(itemIds, (drafts) => {
-      drafts.forEach((draft) => {
-        const time = Temporal.PlainDateTime.from(draft.datetime).toPlainTime()
-        draft.datetime = targetDate
-          .toPlainDateTime(time)
-          .toString()
-          .replace('T', ' ')
-      })
-    })
+    MealRepo.moveManyToDate(itemIds, targetDate)
     return
   }
 
   if (dropOperation === 'copy') {
-    for (const processedItem of itemIds) {
-      const item = mealCollection.get(processedItem)
-      if (!item) continue
-
-      const time = Temporal.PlainDateTime.from(item.datetime).toPlainTime()
-      const datetime = targetDate
-        .toPlainDateTime(time)
-        .toString()
-        .replace('T', ' ')
-
-      mealCollection.insert({
-        ...item,
-        id: crypto.randomUUID(),
-        datetime,
-      })
-    }
+    MealRepo.copyManyToDate(itemIds, targetDate)
   }
 }
 

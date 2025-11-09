@@ -6,5 +6,3 @@ export const mealSchema = z.object({
   items: z.array(z.string()),
   datetime: z.string(),
 })
-
-export type Meal = z.infer<typeof mealSchema>
