@@ -39,9 +39,17 @@ export namespace MealRepo {
 
   type InsertRecord = Omit<Record, 'id'>
 
-  export function insert(record: InsertRecord | InsertRecord[]) {
-    const records = Array.isArray(record) ? record : [record]
+  export function insert(_record: InsertRecord) {
+    const record: Record = {
+      ..._record,
+      id: crypto.randomUUID(),
+    }
+    const tx = mealCollection.insert(encoder.encode(record))
 
+    return { record, tx }
+  }
+
+  export function insertMany(records: InsertRecord[]) {
     return mealCollection.insert(
       records.map((meal) =>
         encoder.encode({
@@ -80,7 +88,7 @@ export namespace MealRepo {
       return { ...meal, datetime }
     })
 
-    return insert(newMeals)
+    return insertMany(newMeals)
   }
 
   /** Move meals to a new date while preserving their time. */

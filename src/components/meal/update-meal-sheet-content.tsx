@@ -10,13 +10,21 @@ import {
   mealFormEncoder,
   mealFormSchema,
 } from './field-group-meal'
-import { MealActionsMenu } from './meal-actions-menu'
+import {
+  MealActionsMenuOnDuplicateFn,
+  MealActionsMenu,
+} from './meal-actions-menu'
+import { Note } from '../ui/note'
 
 export function UpdateMealSheetContent({
   meal,
+  isUpdatingDuplicated,
+  onDuplicate,
   close,
 }: {
   meal: MealRepo.Record
+  isUpdatingDuplicated: boolean
+  onDuplicate: MealActionsMenuOnDuplicateFn
   close: () => void
 }) {
   const defaultValues: z.infer<typeof mealFormSchema> = useMemo(
@@ -46,6 +54,10 @@ export function UpdateMealSheetContent({
         <Sheet.Body className="grid gap-4">
           <form.ServerErrorNote />
 
+          {isUpdatingDuplicated ? (
+            <Note intent="info">You are editing a duplicated meal.</Note>
+          ) : null}
+
           <FieldGroupMeal
             form={form}
             fields={{
@@ -63,7 +75,7 @@ export function UpdateMealSheetContent({
 
           <MealActionsMenu
             meal_id={meal.id}
-            onDuplicate={close}
+            onDuplicate={onDuplicate}
             onDelete={close}
           >
             <Button intent="outline">Actions</Button>
