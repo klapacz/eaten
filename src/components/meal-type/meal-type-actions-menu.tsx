@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import { mealTypeCollection } from '@/db-collections'
+import { MealTypeRepo } from '@/db-collections/meal-type'
 import { IconTrash } from '@intentui/icons'
 import { Menu, MenuContent, MenuItem } from '@/components/ui/menu'
 import { useState } from 'react'
@@ -17,7 +17,7 @@ export function MealTypeActionsMenu({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const handleDelete = async () => {
     try {
-      const tx = mealTypeCollection.delete(meal_type_id)
+      const tx = MealTypeRepo.remove(meal_type_id)
       await tx.isPersisted.promise
       onDelete?.()
     } catch (error) {

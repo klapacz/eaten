@@ -8,6 +8,23 @@ import { ColorSwatchPicker } from '@/components/ui/color-swatch-picker'
 import { parseColor } from 'react-stately'
 import { fieldStyles } from '@/components/ui/field'
 import { MealTypeColorUtils } from '@/utils/meal-type-color.utils'
+import { Encoder } from '@/lib/encoder'
+import { MealTypeRepo } from '@/db-collections/meal-type'
+import { timeEncoder } from '@/lib/internationalized'
+
+export const mealTypeFormEncoder: Encoder<
+  MealTypeRepo.Record,
+  z.infer<typeof mealTypeFormSchema>
+> = {
+  decode: (value) => ({
+    ...value,
+    default_time: timeEncoder.decode(value.default_time),
+  }),
+  encode: (value) => ({
+    ...value,
+    default_time: timeEncoder.encode(value.default_time),
+  }),
+}
 
 export const mealTypeFormSchema = mealTypeSchema.extend({
   default_time: z.instanceof(Time),

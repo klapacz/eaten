@@ -1,24 +1,25 @@
 import { Sheet } from '@/components/ui/sheet'
-import {
-  TanstackForm,
-  useAppForm,
-} from '@/integrations/tanstack-form'
+import { TanstackForm, useAppForm } from '@/integrations/tanstack-form'
 import { useMemo } from 'react'
 import z from 'zod'
-import { Time } from '@internationalized/date'
-import { mealTypeCollection } from '@/db-collections'
-import { mealTypeFormSchema } from './field-group-meal-type'
+import { MealTypeRepo } from '@/db-collections/meal-type'
+import {
+  mealTypeFormEncoder,
+  mealTypeFormSchema,
+} from './field-group-meal-type'
 import { FieldGroupMealType } from './field-group-meal-type'
+import { Temporal } from 'temporal-polyfill'
 
 export function CreateMealTypeSheetContent({ close }: { close: () => void }) {
   const defaultValues: z.infer<typeof mealTypeFormSchema> = useMemo(
-    () => ({
-      id: crypto.randomUUID(),
-      name: '',
-      default_time: new Time(12, 0),
-      consider_time: true,
-      color: 'blue',
-    }),
+    () =>
+      mealTypeFormEncoder.decode({
+        id: crypto.randomUUID(),
+        name: '',
+        default_time: Temporal.PlainTime.from({ hour: 12, minute: 0 }),
+        consider_time: true,
+        color: 'blue',
+      }),
     [],
   )
 
@@ -28,10 +29,7 @@ export function CreateMealTypeSheetContent({ close }: { close: () => void }) {
     },
     defaultValues,
     async onSubmit({ value, formApi }) {
-      const tx = mealTypeCollection.insert({
-        ...value,
-        default_time: value.default_time.toString(),
-      })
+      const tx = MealTypeRepo.insert(mealTypeFormEncoder.encode(value))
       await tx.isPersisted.promise
       formApi.reset()
       close()

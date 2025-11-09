@@ -1,6 +1,7 @@
 import { UpdateMealTypeSheetContent } from '@/components/meal-type/update-meal-type-sheet-content'
 import { Sheet } from '@/components/ui/sheet'
 import { mealTypeCollection } from '@/db-collections'
+import { MealTypeRepo } from '@/db-collections/meal-type'
 import { eq, useLiveQuery } from '@tanstack/react-db'
 import { createFileRoute } from '@tanstack/react-router'
 
@@ -31,7 +32,10 @@ function RouteComponent() {
     >
       <Sheet.Content>
         {({ close }) => (
-          <UpdateMealTypeSheetContent mealType={mealType} close={close} />
+          <UpdateMealTypeSheetContent
+            mealType={MealTypeRepo.encoder.decode(mealType)}
+            close={close}
+          />
         )}
       </Sheet.Content>
     </Sheet>

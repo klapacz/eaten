@@ -1,15 +1,13 @@
 import { Button } from '@/components/ui/button'
 import { Sheet } from '@/components/ui/sheet'
-import {
-  TanstackForm,
-  useAppForm,
-} from '@/integrations/tanstack-form'
+import { TanstackForm, useAppForm } from '@/integrations/tanstack-form'
 import { useMemo } from 'react'
-import { MealType } from '@/schemas/meal_type'
-import { parseTime } from '@internationalized/date'
 import z from 'zod'
-import { mealTypeCollection } from '@/db-collections'
-import { mealTypeFormSchema } from './field-group-meal-type'
+import { MealTypeRepo } from '@/db-collections/meal-type'
+import {
+  mealTypeFormEncoder,
+  mealTypeFormSchema,
+} from './field-group-meal-type'
 import { FieldGroupMealType } from './field-group-meal-type'
 import { MealTypeActionsMenu } from './meal-type-actions-menu'
 
@@ -17,15 +15,13 @@ export function UpdateMealTypeSheetContent({
   mealType,
   close,
 }: {
-  mealType: MealType
+  mealType: MealTypeRepo.Record
   close: () => void
 }) {
-  const defaultValues: z.infer<typeof mealTypeFormSchema> = useMemo(() => {
-    return {
-      ...mealType,
-      default_time: parseTime(mealType.default_time),
-    }
-  }, [mealType])
+  const defaultValues: z.infer<typeof mealTypeFormSchema> = useMemo(
+    () => mealTypeFormEncoder.decode(mealType),
+    [mealType],
+  )
 
   const form = useAppForm({
     validators: {
@@ -33,12 +29,10 @@ export function UpdateMealTypeSheetContent({
     },
     defaultValues,
     async onSubmit({ value, formApi }) {
-      const tx = mealTypeCollection.update(mealType.id, (draft) => {
-        draft.name = value.name
-        draft.default_time = value.default_time.toString()
-        draft.consider_time = value.consider_time
-        draft.color = value.color
-      })
+      const tx = MealTypeRepo.update(
+        mealType.id,
+        mealTypeFormEncoder.encode(value),
+      )
       await tx.isPersisted.promise
       formApi.reset()
       close()
