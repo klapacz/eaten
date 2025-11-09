@@ -1,6 +1,6 @@
+import { CreateMealTypeSheetContent } from '@/components/meal-type/create-meal-type-sheet-content'
 import { Sheet } from '@/components/ui/sheet'
 import { createFileRoute } from '@tanstack/react-router'
-import { CreateMealTypeSheetContent } from './-meal-type-shared'
 
 export const Route = createFileRoute('/_app/meal-type/add')({
   component: RouteComponent,

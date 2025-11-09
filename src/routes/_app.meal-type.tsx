@@ -8,10 +8,10 @@ import AppSidebarNav from './-app-sidebar-nav'
 import { Link } from '@/components/ui/link'
 import { buttonStyles } from '@/components/ui/button'
 import { useIsMobile } from '@/hooks/use-is-mobile'
-import { MealTypeActionsMenu } from './-meal-type-shared'
 import { Temporal } from 'temporal-polyfill'
 import { MenuTrigger } from '@/components/ui/menu'
 import { MealTypeBadge } from '@/components/meal-type-badge'
+import { MealTypeActionsMenu } from '@/components/meal-type/meal-type-actions-menu'
 
 export const Route = createFileRoute('/_app/meal-type')({
   component: App,

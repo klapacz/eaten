@@ -1,8 +1,8 @@
+import { UpdateMealTypeSheetContent } from '@/components/meal-type/update-meal-type-sheet-content'
 import { Sheet } from '@/components/ui/sheet'
 import { mealTypeCollection } from '@/db-collections'
 import { eq, useLiveQuery } from '@tanstack/react-db'
 import { createFileRoute } from '@tanstack/react-router'
-import { UpdateMealTypeSheetContent } from './-meal-type-shared'
 
 export const Route = createFileRoute('/_app/meal-type/$mealTypeId')({
   component: RouteComponent,
