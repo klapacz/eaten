@@ -19,5 +19,11 @@
       "head_sampling_rate": 1,
       "invocation_logs": true
     }
-  }
+  },
+  "hyperdrive": [
+    {
+      "binding": "HYPERDRIVE",
+      "id": "6ea2a84fc1c14cc5a9fba18cb770fdf8"
+    }
+  ]
 }

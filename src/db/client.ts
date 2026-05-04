@@ -1,18 +1,19 @@
-import { NeonDatabase, NeonQueryResultHKT } from 'drizzle-orm/neon-serverless'
-import { Pool } from '@neondatabase/serverless'
-import { ExtractTablesWithRelations } from 'drizzle-orm'
+import type { ExtractTablesWithRelations } from 'drizzle-orm'
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
+import type { NodePgQueryResultHKT } from 'drizzle-orm/node-postgres/session'
+import type { PgTransaction, PgTransactionConfig } from 'drizzle-orm/pg-core'
+import type { Pool } from 'pg'
 import { createContext } from '../context'
-import { PgTransaction, PgTransactionConfig } from 'drizzle-orm/pg-core'
 import * as schema from './schema'
 
 export namespace DB {
   export type Transaction = PgTransaction<
-    NeonQueryResultHKT,
+    NodePgQueryResultHKT,
     typeof schema,
     ExtractTablesWithRelations<typeof schema>
   >
 
-  export type DB = NeonDatabase<typeof schema> & {
+  export type DB = NodePgDatabase<typeof schema> & {
     $client: Pool
   }
 

@@ -1,15 +1,17 @@
 import { createMiddleware, createStart } from '@tanstack/react-start'
 
-import { Pool } from '@neondatabase/serverless'
+import { Pool } from 'pg'
 import { env, waitUntil } from 'cloudflare:workers'
-import { drizzle } from 'drizzle-orm/neon-serverless'
+import { drizzle } from 'drizzle-orm/node-postgres'
 import { DB } from './db/client'
 import * as schema from './db/schema'
 import { AuthContext } from './auth/server'
 
 const dbContextGlobalMiddleware = createMiddleware().server(
   async ({ next }) => {
-    const pool = new Pool({ connectionString: env.DATABASE_URL })
+    const pool = new Pool({
+      connectionString: env.HYPERDRIVE.connectionString,
+    })
     const db = drizzle(pool, { schema, casing: 'snake_case' })
 
     const authConfig: AuthContext.Config = {
