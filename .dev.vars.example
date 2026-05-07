@@ -1,4 +1,4 @@
-DATABASE_URL=
+DATABASE_URL=postgresql://postgres:password@localhost:54321/electric
 GOOGLE_GENERATIVE_AI_API_KEY=
 BETTER_AUTH_SECRET=
 ADMIN_EMAIL="email@example.com,another@example.com"

@@ -23,7 +23,8 @@
   "hyperdrive": [
     {
       "binding": "HYPERDRIVE",
-      "id": "6ea2a84fc1c14cc5a9fba18cb770fdf8"
+      "id": "6ea2a84fc1c14cc5a9fba18cb770fdf8",
+      "localConnectionString": "postgresql://postgres:password@localhost:54321/electric"
     }
   ]
 }
