@@ -14,8 +14,8 @@ import {
 } from 'react-aria-components'
 import { Temporal } from 'temporal-polyfill'
 import { Interval, startOfWeek, toDateFromClockTime } from 'vremel'
-import { buttonStyles } from '@/components/ui/button'
-import { IconChevronLeft, IconChevronRight } from '@intentui/icons'
+import { Button, buttonStyles } from '@/components/ui/button'
+import { IconChevronLeft, IconChevronRight, IconClipboard } from '@intentui/icons'
 import { Link } from '@/components/ui/link'
 import { twMerge } from 'tailwind-merge'
 import { DragIcon } from '@/components/ui/drag-icon'
@@ -27,6 +27,8 @@ import { useIsMobile } from '@/hooks/use-is-mobile'
 import { CreateMealButtonGroup } from '@/components/meal/create-meal-button-group'
 import AppSidebarNav from './-app-sidebar-nav'
 import { MealTypeBadge } from '@/components/meal-type-badge'
+import { copyWeekMeals } from '@/lib/copy-week-meals'
+import { toast } from 'sonner'
 
 const today = Temporal.Now.plainDateISO()
 const todayISO = today.toString()
@@ -138,6 +140,7 @@ function Nav({
           <IconChevronRight />
           <VisuallyHidden>Next Week</VisuallyHidden>
         </Link>
+        <CopyWeekMealsButton weekStart={weekStart} />
       </div>
       <CreateMealButtonGroup
         createMealLinkOptions={{ to: '/calendar/add', search: true }}
@@ -147,6 +150,30 @@ function Nav({
         })}
       />
     </AppSidebarNav>
+  )
+}
+
+function CopyWeekMealsButton({
+  weekStart,
+}: {
+  weekStart: Temporal.PlainDate
+}) {
+  async function handleCopy() {
+    try {
+      await copyWeekMeals(weekStart)
+      toast.success('Copied week meals')
+    } catch (error) {
+      toast.error('Failed to copy week meals', {
+        description: error instanceof Error ? error.message : 'Unknown error',
+      })
+    }
+  }
+
+  return (
+    <Button onPress={handleCopy} intent="plain" size="sq-sm" isCircle>
+      <IconClipboard />
+      <VisuallyHidden>Copy week meals</VisuallyHidden>
+    </Button>
   )
 }
 
