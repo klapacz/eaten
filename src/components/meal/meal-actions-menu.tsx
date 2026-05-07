@@ -10,6 +10,8 @@ import {
 import { useState } from 'react'
 import { Modal } from '@/components/ui/modal'
 
+export type MealActionsMenuOnDuplicateFn = (opts: { meal_id: string }) => void
+
 export function MealActionsMenu({
   meal_id,
   children,
@@ -17,7 +19,7 @@ export function MealActionsMenu({
   onDelete,
 }: React.PropsWithChildren<{
   meal_id: string
-  onDuplicate?: () => void
+  onDuplicate?: MealActionsMenuOnDuplicateFn
   onDelete?: () => void
 }>) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -28,8 +30,8 @@ export function MealActionsMenu({
   }
 
   const handleDuplicate = async () => {
-    MealRepo.duplicate(meal_id)
-    onDuplicate?.()
+    const { record } = MealRepo.duplicate(meal_id)
+    onDuplicate?.({ meal_id: record.id })
   }
 
   return (
